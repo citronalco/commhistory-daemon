@@ -31,6 +31,9 @@
 #include "AbstractInterface"
 #include "Properties"
 
+#include "pending-variant.h"
+#include "pending-variant-map.h"
+
 #include <QSet>
 #include <QSharedDataPointer>
 #include <QVariantMap>
@@ -79,6 +82,32 @@ namespace Client {
         void ServicePointChanged(const Tp::ServicePoint& servicePoint);
     };
 
+    class ChannelInterfaceRoomConfigInterface : public Tp::AbstractInterface {
+    public:
+        static inline QLatin1String staticInterfaceName()
+        {
+            return QLatin1String("org.freedesktop.Telepathy.Channel.Interface.RoomConfig1");
+        }
+
+        PendingVariantMap *requestAllProperties() const
+        {
+            return new PendingVariantMap;
+        }
+    };
+
+    class ChannelInterfaceRoomInterface : public Tp::AbstractInterface {
+    public:
+        static inline QLatin1String staticInterfaceName()
+        {
+            return QLatin1String("org.freedesktop.Telepathy.Channel.Interface.Room2");
+        }
+
+        PendingVariant *requestPropertyRoomName() const
+        {
+            return new PendingVariant;
+        }
+    };
+
 }
 
 class Channel : public StatefulDBusProxy
@@ -91,6 +120,11 @@ public:
     Channel(const QString &objectPath = QString());
 
     QStringList interfaces() const;
+
+    inline bool hasInterface(const QString &name) const
+    {
+        return m_interfaces.contains(name);
+    }
 
     template <typename Interface>
     inline Interface *interface()

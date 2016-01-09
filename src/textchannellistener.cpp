@@ -46,6 +46,8 @@
 #include <TelepathyQt/Contact>
 #include <TelepathyQt/ContactManager>
 #include <TelepathyQt/PendingContacts>
+#include <TelepathyQt/PendingVariant>
+#include <TelepathyQt/PendingVariantMap>
 #include <TelepathyQt/Connection>
 #include <TelepathyQt/Properties>
 #include <TelepathyQt/Presence>
@@ -239,8 +241,17 @@ void TextChannelListener::channelListenerReady()
 {
     qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
 
-    if (m_IsGroupChat)
-        handleTpProperties();
+    if (m_IsGroupChat) {
+        if(m_Channel->hasInterface(Tp::Client::ChannelInterfaceRoomConfigInterface::staticInterfaceName()) &&
+            m_Channel->hasInterface(Tp::Client::ChannelInterfaceRoomInterface::staticInterfaceName()))
+        {
+            handleTpRoomProperties();
+        }
+        else if(m_Channel->hasInterface(Tp::Client::DBus::PropertiesInterface::staticInterfaceName()))
+        {
+            handleTpProperties();
+        }
+    }
 
     Tp::TextChannelPtr textChannel = Tp::TextChannelPtr::dynamicCast(m_Channel);
 
@@ -435,6 +446,44 @@ void TextChannelListener::handleTpProperties()
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(propertyCall, this);
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher *)),
             this, SLOT(slotListPropertiesFinished(QDBusPendingCallWatcher *)));
+}
+
+void TextChannelListener::handleTpRoomProperties()
+{
+    Tp::Client::ChannelInterfaceRoomConfigInterface* roomConfigInterface = m_Channel->interface<Tp::Client::ChannelInterfaceRoomConfigInterface>();
+    connect( roomConfigInterface->requestAllProperties(),
+             SIGNAL(finished(Tp::PendingOperation*)),
+             this,
+             SLOT(slotRequestAllRoomProperies(Tp::PendingOperation*))
+             );
+    Tp::Client::ChannelInterfaceRoomInterface* roomInterface = m_Channel->interface<Tp::Client::ChannelInterfaceRoomInterface>();
+    connect( roomInterface->requestPropertyRoomName(),
+            SIGNAL(finished(Tp::PendingOperation*)),
+            this,
+            SLOT(slotRequestPropertyRoomName(Tp::PendingOperation*))
+            );
+    connect( roomConfigInterface,
+             SIGNAL(propertiesChanged(const QVariantMap&, const QStringList&)),
+             this,
+             SLOT(slotRoomPropertiesChanged(const QVariantMap&,const QStringList&))
+             );
+    roomConfigInterface->setMonitorProperties(true);
+}
+
+void TextChannelListener::processRoomProperties(const QVariantMap &properties)
+{
+    QVariantMap::const_iterator i = properties.constBegin();
+
+    while(i != properties.constEnd()) {
+        if(i.key() == "Title") {
+            QString title = i.value().toString();
+            if( !title.isEmpty() && m_ChannelSubject != title ) {
+                m_ChannelSubject = title;
+                updateGroupChatName( ChannelSubject, false );
+            }
+        }
+        i++;
+    }
 }
 
 void TextChannelListener::slotListPropertiesFinished(QDBusPendingCallWatcher *watcher)
@@ -1780,6 +1829,35 @@ void TextChannelListener::slotPropertiesChanged(const Tp::PropertyValueList &pro
 
     if (changedProperty != None)
         updateGroupChatName(changedProperty, listProps);
+}
+void TextChannelListener::slotRequestAllRoomProperies(Tp::PendingOperation *operation)
+{
+    DEBUG() << __FUNCTION__;
+
+    QVariantMap properties = dynamic_cast<Tp::PendingVariantMap*>( operation )->result();
+    processRoomProperties(properties);
+}
+
+void TextChannelListener::slotRequestPropertyRoomName(Tp::PendingOperation *operation)
+{
+    DEBUG() << __FUNCTION__;
+
+    QString name = dynamic_cast<Tp::PendingVariant*>( operation )->result().toString();
+
+    if( !name.isEmpty() && m_ChannelName != name )
+    {
+        m_ChannelName = name;
+        if( m_ChannelSubject.isEmpty() )
+        {
+            updateGroupChatName(ChannelName, false);
+        }
+    }
+}
+
+void TextChannelListener::slotRoomPropertiesChanged(const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
+{
+    DEBUG() << __FUNCTION__;
+    processRoomProperties(changedProperties);
 }
 
 void TextChannelListener::slotGroupMembersChanged(

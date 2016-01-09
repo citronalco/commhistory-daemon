@@ -5,6 +5,9 @@
 # Input
 
 HEADERS += $$PWD/TelepathyQt/pending-operation.h
+HEADERS += $$PWD/TelepathyQt/global.h
+HEADERS += $$PWD/TelepathyQt/pending-variant-map.h
+HEADERS += $$PWD/TelepathyQt/pending-variant.h
 HEADERS += $$PWD/TelepathyQt/ready-object.h
 HEADERS += $$PWD/TelepathyQt/account-manager.h
 HEADERS += $$PWD/TelepathyQt/account.h
@@ -29,6 +32,8 @@ HEADERS += $$PWD/TpExtensions/cli-connection.h
 HEADERS += $$PWD/notificationmanager.h
 
 SOURCES += $$PWD/TelepathyQt/pending-operation.cpp
+SOURCES += $$PWD/TelepathyQt/pending-variant-map.cpp
+SOURCES += $$PWD/TelepathyQt/pending-variant.cpp
 SOURCES += $$PWD/TelepathyQt/ready-object.cpp
 SOURCES += $$PWD/TelepathyQt/account-manager.cpp
 SOURCES += $$PWD/TelepathyQt/account.cpp

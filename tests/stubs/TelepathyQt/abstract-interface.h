@@ -56,6 +56,14 @@ public:
 
     bool isValid() const {return m_isValid;}
 
+    void setMonitorProperties(bool monitorProperties){
+        Q_UNUSED(monitorProperties);
+    }
+
+Q_SIGNALS:
+    void propertiesChanged(const QVariantMap &changedProperties,
+            const QStringList &invalidatedProperties);
+
 public:
     void ut_setIsValid(bool valid) {m_isValid = valid;}
 
