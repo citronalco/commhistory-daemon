@@ -71,8 +71,7 @@ int sigtermFd[2];
 void termSignalHandler(int)
 {
     char a = 1;
-    if(write(sigtermFd[0], &a, sizeof(a)) < 1)
-    {
+    if (write(sigtermFd[0], &a, sizeof(a)) < 1) {
         qWarning("Failed to handle term signal.");
     }
 }
@@ -85,7 +84,7 @@ void setupSigtermHandler()
     sigemptyset(&term.sa_mask);
     term.sa_flags = SA_RESTART;
 
-    if(::sigaction(SIGTERM, &term, 0))
+    if (::sigaction(SIGTERM, &term, 0))
         qFatal("Failed setup SIGTERM signal handler");
 }
 

@@ -37,7 +37,7 @@ Serialisable::~Serialisable()
 
 void Serialisable::serialize(QDataStream& out, const QObject& object) const
 {
-    for(int i = 1; i < object.metaObject()->propertyCount(); i++) {
+    for (int i = 1; i < object.metaObject()->propertyCount(); i++) {
        QMetaProperty prop = object.metaObject()->property(i);
        if (prop.isWritable()) {
            const char* propName = prop.name();
@@ -48,7 +48,7 @@ void Serialisable::serialize(QDataStream& out, const QObject& object) const
 
 void Serialisable::deSerialize(QDataStream& in, QObject& object)
 {
-    for(int i = 1; i < object.metaObject()->propertyCount(); i++) {
+    for (int i = 1; i < object.metaObject()->propertyCount(); i++) {
        QMetaProperty prop = object.metaObject()->property(i);
        if (prop.isWritable()) {
            const char* propName = prop.name();

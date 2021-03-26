@@ -217,7 +217,7 @@ void StreamChannelListener::slotGroupMembersChanged(
 
     Tp::StreamedMediaChannelPtr mediaChannel = Tp::StreamedMediaChannelPtr::dynamicCast(m_Channel);
 
-    if(!mediaChannel.isNull()) {
+    if (!mediaChannel.isNull()) {
         if (!m_CallStarted) {
             // call not started, new member added, members > 1
             if (!groupMembersAdded.isEmpty() &&

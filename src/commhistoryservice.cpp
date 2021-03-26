@@ -46,10 +46,10 @@ CommHistoryService::CommHistoryService( QObject* parent )
     }
 
     if (parent) {
-        if(!QDBusConnection::sessionBus().registerObject(COMM_HISTORY_DAEMON_OBJECT_PATH, this)) {
+        if (!QDBusConnection::sessionBus().registerObject(COMM_HISTORY_DAEMON_OBJECT_PATH, this)) {
             qWarning() << "Object registration failed!";
         } else {
-            if(!QDBusConnection::sessionBus().registerService(COMM_HISTORY_DAEMON_SERVICE_NAME)) {
+            if (!QDBusConnection::sessionBus().registerService(COMM_HISTORY_DAEMON_SERVICE_NAME)) {
                 qWarning() << "Unable to register commhistory service!"
                            << QDBusConnection::sessionBus().lastError();
             } else {

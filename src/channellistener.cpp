@@ -70,11 +70,11 @@ bool ChannelListener::checkIfError(Tp::PendingOperation* operation)
 {
     bool error = true;
 
-    if( operation && !operation->isError() ) {
+    if (operation && !operation->isError()) {
         error = false;
-    } else if( operation ) {
-        finishedWithError( operation->errorName(),
-                           operation->errorMessage() );
+    } else if (operation) {
+        finishedWithError(operation->errorName(),
+                          operation->errorMessage());
     }
     return error;
 }
@@ -91,7 +91,7 @@ void ChannelListener::invalidated(Tp::DBusProxy *proxy,
 void ChannelListener::finishedWithError(const QString& errorName,
                                         const QString& errorMessage)
 {
-    if( !m_InvocationContext.isNull() ) {
+    if (!m_InvocationContext.isNull()) {
         m_InvocationContext->setFinishedWithError(errorName, errorMessage);
     }
     closed();
@@ -104,7 +104,7 @@ ChannelListener::~ChannelListener()
 QString ChannelListener::channel() const
 {
     QString channel;
-    if(!m_Channel.isNull()) {
+    if (!m_Channel.isNull()) {
         channel = m_Channel->objectPath();
     }
     return channel;
@@ -134,7 +134,7 @@ void ChannelListener::makeChannelReady(const Tp::Features &features)
 
 void ChannelListener::invocationContextFinished()
 {
-    if(!m_InvocationContext.isNull()) {
+    if (!m_InvocationContext.isNull()) {
         m_InvocationContext->setFinished();
     }
 }
@@ -146,7 +146,7 @@ void ChannelListener::invocationContextError()
 
 CommHistory::EventModel& ChannelListener::eventModel()
 {
-    if(!m_pEventModel){
+    if (!m_pEventModel) {
         m_pEventModel = new CommHistory::EventModel(this);
     }
 

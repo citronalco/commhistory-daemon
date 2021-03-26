@@ -75,13 +75,13 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(!connection)
+    if (!connection)
         return;
 
     Tp::AccountPtr account;
     Tp::AccountManagerPtr accountManager = m_pConnectionUtils->accountManager();
 
-    if(accountManager && accountManager->isReady()) {
+    if (accountManager && accountManager->isReady()) {
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection object path: " << connection->objectPath();
 #if 1
         foreach (Tp::AccountPtr a, accountManager->validAccounts()->accounts()) {
@@ -96,13 +96,13 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
         filter.insert(QLatin1String("connection"), QVariant::fromValue(connection));
         Tp::AccountSetPtr accountSet =
                 accountManager->filterAccounts(filter);
-        if(!accountSet->accounts().isEmpty()){
+        if (!accountSet->accounts().isEmpty()) {
             account = accountSet->accounts().first();
         }
 #endif
     }
 
-    if(account) {
+    if (account) {
         // Create ContactAuthorizer only for IM accounts:
         if (connection->actualFeatures().contains(Tp::Connection::FeatureSimplePresence))
         {
@@ -133,7 +133,7 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
             connect(authorizer, SIGNAL(destroyed(QObject*)), this, SLOT(slotRemoveAuthorizer(QObject*)));
 
             m_authorizers.insert(account->uniqueIdentifier(), authorizer);
-            if(parent()) {
+            if (parent()) {
                 connect(parent(), SIGNAL(showAuthorizationDialog(QString, QString, QString,
                                                                  QString, QString, QString)),
                         authorizer, SLOT(slotShowAuthorizationDialog(QString, QString, QString,
@@ -167,7 +167,7 @@ void ContactAuthorizationListener::slotAccountConnectionStatusChanged(Tp::Connec
 
     Tp::Account *account = qobject_cast<Tp::Account *>(sender());
 
-    if(account != 0 && account->isValid()) {
+    if (account != 0 && account->isValid()) {
         if (connectionStatus == Tp::ConnectionStatusConnected) {
             if (!m_authorizers.contains(account->uniqueIdentifier())) {
                 qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection status changed to Connected";

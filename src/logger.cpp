@@ -60,7 +60,7 @@ Logger::Logger(const Tp::AccountManagerPtr &accountManager,
       AbstractClientPtr::dynamicCast(SharedPtr<LoggerClientObserver>(observer)),
       COMMHISTORY_CHANNEL_OBSERVER);
 
-    if(registered) {
+    if (registered) {
         qCDebug(lcCommhistoryd) << "commhistoryd: started";
     } else {
         qCritical() << "commhistoryd: observer registration failed";
@@ -95,7 +95,7 @@ void Logger::createChannelListener(const QString &channelType,
     qCDebug(lcCommhistoryd) << "creating listener for: " << channelObjectPath << " type " << channelType;
 
     ChannelListener* listener = 0;
-    if( channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT) ) {
+    if (channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT) ) {
         listener = new TextChannelListener(account, channel, context, this);
         connect(listener, SIGNAL(savingFailed(const Tp::ConnectionPtr&)),
                 m_Reviver, SLOT(checkConnection(const Tp::ConnectionPtr&)));
@@ -103,7 +103,7 @@ void Logger::createChannelListener(const QString &channelType,
         listener = new StreamChannelListener(account, channel, context, this);
     }
 
-    if(listener) {
+    if (listener) {
         connect(listener, SIGNAL(channelClosed(ChannelListener *)),
                 this, SLOT(channelClosed(ChannelListener *)));
         m_Channels.append( channelObjectPath );
@@ -114,7 +114,7 @@ void Logger::channelClosed(ChannelListener *listener)
 {
     qCDebug(lcCommhistoryd) << __FUNCTION__ << "Got channelClosed signal from listener. Deleting listener.";
 
-    if(listener) {
+    if (listener) {
         listener->deleteLater();
         listener = 0;
     }

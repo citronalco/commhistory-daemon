@@ -244,7 +244,7 @@ void TextChannelListener::channelListenerReady()
 
     Tp::TextChannelPtr textChannel = Tp::TextChannelPtr::dynamicCast(m_Channel);
 
-    if(!textChannel.isNull()) {
+    if (!textChannel.isNull()) {
         connect( textChannel.data(),
                  SIGNAL( messageReceived(const Tp::ReceivedMessage&) ),
                  SLOT( slotMessageReceived(const Tp::ReceivedMessage&) ),
@@ -265,7 +265,7 @@ void TextChannelListener::channelListenerReady()
         QVariantMap properties = textChannel->immutableProperties();
 
         QVariant property = properties.value(TP_QT_IFACE_CHANNEL_INTERFACE_SMS + QLatin1String(".Flash"), QVariant());
-        if(property.isValid() && property.value<bool>() == true) {
+        if (property.isValid() && property.value<bool>() == true) {
             qCDebug(lcCommhistoryd) << __FUNCTION__ << "Channel contains class 0 property";
             m_isClassZeroSMS = true;
         }
@@ -775,7 +775,7 @@ void TextChannelListener::handleMessages()
 
 CommHistory::ConversationModel& TextChannelListener::conversationModel()
 {
-    if(!m_pConversationModel){
+    if (!m_pConversationModel) {
         m_pConversationModel = new CommHistory::ConversationModel(this);
         // We are interested only in replace type that will be stored into Headers property:
         m_pConversationModel->setPropertyMask(CommHistory::Event::PropertySet()
@@ -1089,8 +1089,8 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
                  << "error message:" << errorMessage;
 
         // dont show notes for perm. failed mms messages
-        if(event.type() == CommHistory::Event::MMSEvent &&
-           status == Tp::DeliveryStatusPermanentlyFailed) {
+        if (event.type() == CommHistory::Event::MMSEvent
+                && status == Tp::DeliveryStatusPermanentlyFailed) {
             return;
         }
 
@@ -1736,7 +1736,7 @@ void TextChannelListener::slotContactsReady(Tp::PendingOperation* operation)
         for ( int i = 0; i < contacts.count(); i++ )
         {
             // initialise presence values:
-            if(!contacts.value(i).isNull()) {
+            if (!contacts.value(i).isNull()) {
                 m_PresenceStatuses.insert(contacts.value(i)->id(),Presence(contacts.value(i)->presence().status(),
                                           contacts.value(i)->presence().statusMessage()));
             }

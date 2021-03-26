@@ -42,16 +42,16 @@ class Request {
 public:
     bool operator==(const Request& other) const
     {
-        if(contact && other.contact
+        if (contact && other.contact
            && !contact->handle().isEmpty() && !other.contact->handle().isEmpty()
-           && contact->handle().first() == other.contact->handle().first()){
+           && contact->handle().first() == other.contact->handle().first()) {
             return true;
         } else {
             return false;
         }
     }
 
-    Request& operator=(const Request& other){
+    Request& operator=(const Request& other) {
         if (this != &other) {
             notificationId = other.notificationId;
             contact = other.contact;
@@ -62,7 +62,7 @@ public:
         return *this;
     }
 
-    bool isValid(){return !contact.isNull();}
+    bool isValid() {return !contact.isNull();}
 
     QString notificationId;
     Tp::ContactPtr contact;

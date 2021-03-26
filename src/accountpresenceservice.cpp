@@ -59,7 +59,7 @@ AccountPresenceService::AccountPresenceService(Tp::AccountManagerPtr manager, QO
     if (!QDBusConnection::sessionBus().registerObject(ACCOUNT_PRESENCE_OBJECT_PATH, this)) {
         qWarning() << "Object registration failed!";
     } else {
-        if(!QDBusConnection::sessionBus().registerService(ACCOUNT_PRESENCE_SERVICE_NAME)) {
+        if (!QDBusConnection::sessionBus().registerService(ACCOUNT_PRESENCE_SERVICE_NAME)) {
             qWarning() << "Unable to register account presence service!"
                        << QDBusConnection::sessionBus().lastError();
         } else {

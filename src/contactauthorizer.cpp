@@ -69,7 +69,7 @@ ContactAuthorizer::ContactAuthorizer(const Tp::ConnectionPtr& connection,
 
     if (connection->status() == Tp::ConnectionStatusConnected) {
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Account's' connection status is CONNECTED!";
-        if(connection->isReady(Tp::Connection::FeatureRoster)) {
+        if (connection->isReady(Tp::Connection::FeatureRoster)) {
             listenToAuthorization(connection);
         } else {
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Asking FeatureRoster to be downloaded...";
@@ -106,7 +106,7 @@ void ContactAuthorizer::slotConnectionFeaturesReady(Tp::PendingOperation* op)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(op && !op->isError() && !m_connection.isNull() && m_connection->isReady())
+    if (op && !op->isError() && !m_connection.isNull() && m_connection->isReady())
         listenToAuthorization(m_connection);
 }
 
@@ -116,7 +116,7 @@ void ContactAuthorizer::listenToAuthorization(const Tp::ConnectionPtr& connectio
 
     m_pContactManager = connection->contactManager();
 
-    if(m_pContactManager){
+    if (m_pContactManager) {
         // Connect to listen invitation requests:
         connect(m_pContactManager.data(),
                 SIGNAL(presencePublicationRequested(const Tp::Contacts)),
@@ -171,9 +171,9 @@ void ContactAuthorizer::slotPresencePublicationRequested(const Tp::Contacts &con
     qDeleteAll(notifications);
     notifications.clear();
 
-    if(!pendingContacts.isEmpty()){
-        if(m_pContactManager
-           && m_pContactManager->supportedFeatures().contains(Tp::Contact::FeatureAvatarData)){
+    if (!pendingContacts.isEmpty()) {
+        if (m_pContactManager
+           && m_pContactManager->supportedFeatures().contains(Tp::Contact::FeatureAvatarData)) {
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Adding auth. requests to pending queue to wait for avatar";
             upgradeContacts(pendingContacts);
             queueAuthorization(pendingContacts, m_authRequestWaitingForAvatar);
@@ -228,16 +228,16 @@ void ContactAuthorizer::queueAuthorization(const Tp::Contacts contacts,
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(contacts.count() == 0)
+    if (contacts.count() == 0)
         return;
 
     QSet<Tp::ContactPtr>::const_iterator i;
-    for (i = contacts.constBegin(); i != contacts.constEnd(); ++i){
+    for (i = contacts.constBegin(); i != contacts.constEnd(); ++i) {
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Queuing request";
         Request request;
         request.contact = *i;
         request.message = request.contact->publishStateMessage();
-        if(!requestQueue.contains(request)){
+        if (!requestQueue.contains(request)) {
             requestQueue.append(request);
         }
      }
@@ -251,7 +251,7 @@ void ContactAuthorizer::queueAuthorization(const Tp::ContactPtr& contact,
     Request tmpRequest;
     tmpRequest.contact = contact;
 
-    if(m_authRequestWaitingForAvatar.contains(tmpRequest)) {
+    if (m_authRequestWaitingForAvatar.contains(tmpRequest)) {
         // If this is a request that didn't already get an avatar, let's put it the list of
         // the pending requests and fire it.
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "adding request to pending requests queue to wait for an avatar";
@@ -260,12 +260,12 @@ void ContactAuthorizer::queueAuthorization(const Tp::ContactPtr& contact,
             (m_authRequestWaitingForAvatar.indexOf(tmpRequest));
         r.filename = avatarFile;
 
-       if(!m_authRequests.contains(r)) {
+       if (!m_authRequests.contains(r)) {
             m_authRequests.append(r);
             m_authRequestWaitingForAvatar.removeOne(r);
             fireAuthorisationRequest();
        }
-    } else if(m_authRequests.contains(tmpRequest)) {
+    } else if (m_authRequests.contains(tmpRequest)) {
         // This is a pending request that already got an avatar (someway or another) but has
         // not been published yet. Let's simply update it.
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "pending request already having avatar, not published yet, updating avatar to it";
@@ -273,7 +273,7 @@ void ContactAuthorizer::queueAuthorization(const Tp::ContactPtr& contact,
         Request r = m_authRequests.value(index);
         r.filename = avatarFile;
         m_authRequests.replace(index,r);
-    } else if(m_publishedAuthRequests.contains(tmpRequest)) {
+    } else if (m_publishedAuthRequests.contains(tmpRequest)) {
         // This is a request that was already published. Let's change the avatar, update the
         // and hope the notification and hope the user hasn't tapped it yet :)
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Already published request, but did not contain avatar.";
@@ -409,7 +409,7 @@ void ContactAuthorizer::fireAuthorisationRequest()
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(!m_connection)
+    if (!m_connection)
         return;
 
     foreach(Request request, m_authRequests) {
@@ -418,7 +418,7 @@ void ContactAuthorizer::fireAuthorisationRequest()
         QString message;
         QString transactionId;
 
-        if(!request.contact->id().isEmpty()){
+        if (!request.contact->id().isEmpty()) {
             id = request.contact->id();
             filename = request.filename;
             message = request.message;
@@ -453,7 +453,7 @@ void ContactAuthorizer::fireAuthorisationRequest()
 
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Notification published with notification id: " << request.notificationId;
         m_authRequests.removeOne(request);
-        if(!m_publishedAuthRequests.contains(request)){
+        if (!m_publishedAuthRequests.contains(request)) {
             qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Appending request to published auth requests queue";
             m_publishedAuthRequests.append(request);
         }
@@ -472,7 +472,7 @@ void ContactAuthorizer::slotShowAuthorizationDialog(const QString& contactId,
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Authorization dialog asked to be shown for account: " << accountPath << " requester being contact id: " << contactId;
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Contact's avatar filename: " << filename;
 
-    if(m_account && m_account->objectPath() != accountPath) {
+    if (m_account && m_account->objectPath() != accountPath) {
         qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "This ContactsAuthorizer does not serve the given account, but " << m_account->objectPath();
         return;
     }
@@ -487,12 +487,12 @@ void ContactAuthorizer::slotShowAuthorizationDialog(const QString& contactId,
     foreach(Request request, m_publishedAuthRequests) {
         // Remove requests that don't have a valid contact associated with them.
         // Why should it happen in the first place, by the way?
-        if(request.contact->id().isEmpty()) {
+        if (request.contact->id().isEmpty()) {
            m_publishedAuthRequests.removeOne(request);
            continue;
         }
 
-        if(request.contact->id() == contactId) {
+        if (request.contact->id() == contactId) {
             // We found a request amongst the ones we were keeping track of, i.e. one that was
             // generating during the same session (not before a reboot).
             // This means we can start the UI right away.
@@ -509,7 +509,7 @@ void ContactAuthorizer::slotShowAuthorizationDialog(const QString& contactId,
     // If we couldn't find a request, it means that the user has tapped on an authorization
     // request that was issued before a reboot, so we have to create the request again and
     // find the contact.
-    if(!requestFound && m_pContactManager) {
+    if (!requestFound && m_pContactManager) {
         Request req;
         Tp::PendingContacts *pendingContacts;
         QVariant reqVariant;
@@ -533,7 +533,7 @@ void ContactAuthorizer::slotDialogDismissed(const QString& dialogId, int result)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(m_ongoingRequest.isValid() && m_ongoingRequest.transactionId == dialogId) {
+    if (m_ongoingRequest.isValid() && m_ongoingRequest.transactionId == dialogId) {
         QDBusConnection::sessionBus().disconnect(BUDDY_AUTHORIZER_SERVICE_NAME,
                                                  OBJECT_PATH,
                                                  BUDDY_AUTHORIZER_INTERFACE_NAME,
@@ -592,7 +592,7 @@ void ContactAuthorizer::slotAuthoriserQueryFinished(QDBusPendingCallWatcher* wat
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(m_ongoingRequest.isValid() &&  watcher){
+    if (m_ongoingRequest.isValid() && watcher) {
 
         QDBusPendingReply<> reply = *watcher;
 
@@ -602,7 +602,7 @@ void ContactAuthorizer::slotAuthoriserQueryFinished(QDBusPendingCallWatcher* wat
              Request empty;
              m_ongoingRequest = empty;
              m_requestTapped = false;
-         } else if(reply.isFinished()){
+         } else if (reply.isFinished()) {
              QDBusConnection::sessionBus().connect(BUDDY_AUTHORIZER_SERVICE_NAME,
                                                    OBJECT_PATH,
                                                    BUDDY_AUTHORIZER_INTERFACE_NAME,
@@ -620,7 +620,7 @@ void ContactAuthorizer::authorizeContact(const Tp::ContactPtr& contact)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(m_pContactManager && contact) {
+    if (m_pContactManager && contact) {
         Tp::PendingOperation* po = m_pContactManager->authorizePresencePublication(
                 QList<Tp::ContactPtr>() << contact);
         connect(po, SIGNAL(finished(Tp::PendingOperation*)),
@@ -645,7 +645,7 @@ void ContactAuthorizer::blockContact(const Tp::ContactPtr& contact)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
-    if(m_pContactManager && contact) {
+    if (m_pContactManager && contact) {
         Tp::PendingOperation *po = m_pContactManager->blockContacts
             (QList<Tp::ContactPtr>() << contact);
         connect(po, SIGNAL(finished(Tp::PendingOperation*)),
@@ -699,7 +699,7 @@ void ContactAuthorizer::slotConnectionInvalidated(Tp::DBusProxy*,
     deleteLater();
 
     // close ui if it is open
-    if(m_ongoingRequest.isValid()){
+    if (m_ongoingRequest.isValid()) {
         QDBusInterface interface(BUDDY_AUTHORIZER_APP_NAME,
                                  OBJECT_PATH,
                                  BUDDY_AUTHORIZER_APP_IF);
