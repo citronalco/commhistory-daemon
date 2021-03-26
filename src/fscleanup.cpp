@@ -29,8 +29,9 @@
 
 #include <QDirIterator>
 #include <QDBusConnection>
+#include <QLoggingCategory>
 
-#define DEBUG_(x) qDebug() << "FsCleanup:" << x
+Q_LOGGING_CATEGORY(lcFsCleanup, "commhistoryd.fscleanup", QtWarningMsg)
 
 FsCleanup::FsCleanup(QObject* aParent) :
     QObject(aParent)
@@ -47,23 +48,23 @@ void FsCleanup::onEventDeleted(int aEventId)
 {
     CommHistory::DatabaseIO* io = CommHistory::DatabaseIO::instance();
     if (!io->eventExists(aEventId)) {
-        DEBUG_("Event" << aEventId << "deleted");
+        qCDebug(lcFsCleanup) << "FsCleanup: Event" << aEventId << "deleted";
         deleteFiles(aEventId);
     } else {
         // Ignore deleteEvent signals emitted by EventModel::moveEvent
-        DEBUG_("Ignoring delete signal for" << aEventId);
+        qCDebug(lcFsCleanup) << "FsCleanup: Ignoring delete signal for" << aEventId;
     }
 }
 
 void FsCleanup::onGroupsDeleted(QList<int> aGroupIds)
 {
-    DEBUG_(aGroupIds.count() << "group(s) deleted");
+    qCDebug(lcFsCleanup) << "FsCleanup:" << aGroupIds.count() << "group(s) deleted";
     fullCleanup();
 }
 
 void FsCleanup::fullCleanup()
 {
-    DEBUG_("Running full cleanup");
+    qCDebug(lcFsCleanup) << "FsCleanup: Running full cleanup";
     CommHistory::DatabaseIO* io = CommHistory::DatabaseIO::instance();
     QDirIterator it(CommHistoryDatabasePath::dataDir(),
         QDir::Dirs | QDir::NoDotAndDotDot);
@@ -75,7 +76,7 @@ void FsCleanup::fullCleanup()
             deleteFiles(id);
         }
     }
-    DEBUG_("Cleanup done");
+    qCDebug(lcFsCleanup) << "FsCleanup: Cleanup done";
 }
 
 void FsCleanup::deleteFiles(int aEventId)
@@ -88,7 +89,7 @@ bool FsCleanup::removeDir(QString aDirPath)
     bool result = true;
     QDir dir(aDirPath);
     if (dir.exists()) {
-        DEBUG_("Removing" << aDirPath);
+        qCDebug(lcFsCleanup) << "FsCleanup: Removing" << aDirPath;
         QFileInfoList list = dir.entryInfoList(QDir::NoDotAndDotDot |
             QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files,
             QDir::DirsFirst);
@@ -101,13 +102,13 @@ bool FsCleanup::removeDir(QString aDirPath)
                 result = QFile::remove(path);
             }
             if (!result) {
-                qWarning() << "Failed to remove" << path;
+                qWarning() << "FsCleanup: Failed to remove" << path;
                 return result;
             }
         }
         result = dir.rmdir(aDirPath);
         if (!result) {
-            qWarning() << "Failed to remove" << aDirPath;
+            qWarning() << "FsCleanup: Failed to remove" << aDirPath;
         }
     }
     return result;

@@ -52,7 +52,7 @@ ChannelListener::ChannelListener(const Tp::AccountPtr &account,
 
 void ChannelListener::slotChannelReady(Tp::PendingOperation* operation)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << channel();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << channel();
 
     if (!checkIfError(operation) && m_Channel) {
         m_Direction = m_Channel->isRequested() ?
@@ -82,7 +82,7 @@ bool ChannelListener::checkIfError(Tp::PendingOperation* operation)
 void ChannelListener::invalidated(Tp::DBusProxy *proxy,
             const QString &errorName, const QString &errorMessage)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << proxy->objectPath();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << proxy->objectPath();
 
     Q_UNUSED(proxy)
     finishedWithError(errorName, errorMessage);
@@ -112,7 +112,7 @@ QString ChannelListener::channel() const
 
 void ChannelListener::closed()
 {
-    DEBUG() << "channelClosed";
+    qCDebug(lcCommhistoryd) << "channelClosed";
     emit channelClosed(this);
 }
 
@@ -170,5 +170,5 @@ QString ChannelListener::targetId() const
 
 void ChannelListener::channelReady()
 {
-    DEBUG() << Q_FUNC_INFO << "not implemented";
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "not implemented";
 }

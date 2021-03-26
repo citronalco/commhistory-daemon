@@ -61,7 +61,7 @@ Logger::Logger(const Tp::AccountManagerPtr &accountManager,
       COMMHISTORY_CHANNEL_OBSERVER);
 
     if(registered) {
-        DEBUG() << "commhistoryd: started";
+        qCDebug(lcCommhistoryd) << "commhistoryd: started";
     } else {
         qCritical() << "commhistoryd: observer registration failed";
     }
@@ -76,7 +76,7 @@ void Logger::createChannelListener(const QString &channelType,
                                    const Tp::AccountPtr &account,
                                    const Tp::ChannelPtr &channel)
 {
-    DEBUG() << __PRETTY_FUNCTION__;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
 
     QString channelObjectPath = channel->objectPath();
 
@@ -92,7 +92,7 @@ void Logger::createChannelListener(const QString &channelType,
             this,
             SLOT( slotInvalidated(Tp::DBusProxy*, const QString&, const QString& ) ) );
 
-    DEBUG() << "creating listener for: " << channelObjectPath << " type " << channelType;
+    qCDebug(lcCommhistoryd) << "creating listener for: " << channelObjectPath << " type " << channelType;
 
     ChannelListener* listener = 0;
     if( channelType == QLatin1String(TP_QT_IFACE_CHANNEL_TYPE_TEXT) ) {
@@ -112,7 +112,7 @@ void Logger::createChannelListener(const QString &channelType,
 
 void Logger::channelClosed(ChannelListener *listener)
 {
-    DEBUG() << __FUNCTION__ << "Got channelClosed signal from listener. Deleting listener.";
+    qCDebug(lcCommhistoryd) << __FUNCTION__ << "Got channelClosed signal from listener. Deleting listener.";
 
     if(listener) {
         listener->deleteLater();
@@ -123,7 +123,7 @@ void Logger::channelClosed(ChannelListener *listener)
 void Logger::slotInvalidated(Tp::DBusProxy *proxy,
             const QString &errorName, const QString &errorMessage)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << proxy->objectPath();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << proxy->objectPath();
 
     Q_UNUSED(proxy)
     Q_UNUSED(errorName)
@@ -131,7 +131,7 @@ void Logger::slotInvalidated(Tp::DBusProxy *proxy,
 
     Tp::Channel *channel = qobject_cast<Tp::Channel *>(sender());
     if (channel) {
-        DEBUG() << __PRETTY_FUNCTION__ << "Removing " << channel->objectPath() << " from channels list";
+        qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Removing " << channel->objectPath() << " from channels list";
         m_Channels.removeAll(channel->objectPath());
     }
 

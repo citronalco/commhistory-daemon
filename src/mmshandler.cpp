@@ -31,10 +31,13 @@
 #include <CommHistory/groupmanager.h>
 #include <CommHistory/constants.h>
 #include <CommHistory/mmsconstants.h>
+
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusPendingCall>
 #include <QDBusPendingCallWatcher>
+#include <QLoggingCategory>
+
 #include <mdconfgroup.h>
 #include <qofonosimmanager.h>
 #include <qofononetworkregistration.h>
@@ -44,7 +47,7 @@
 using namespace RTComLogger;
 using namespace CommHistory;
 
-#define DEBUG_(x) qDebug() << "MmsHandler:" << x
+Q_LOGGING_CATEGORY(lcMmsHandler, "commhistoryd.mmshandler", QtWarningMsg)
 
 static const QString kSettingSendFlags("/mms/send-flags");
 static const QString kSettingAutomaticDownload("/mms/automatic-download");
@@ -54,8 +57,7 @@ static const char *kCallPropertyEventId = "mms-event-id";
 
 class MmsHandlerModem
 {
-    public:
-
+public:
     MmsHandlerModem(const QString &path, QObject *parent) :
         sim(new QOfonoSimManager(parent)),
         network(new QOfonoNetworkRegistration(parent)),
@@ -120,7 +122,7 @@ QDBusPendingCall MmsHandler::callEngine(const QString &method, const QVariantLis
 
 void MmsHandler::onOfonoAvailableChanged(bool available)
 {
-    DEBUG_("ofono available changed to" << available);
+    qCDebug(lcMmsHandler) << "MmsHandler: ofono available changed to" << available;
     if (available) {
         addAllModems();
     } else {
@@ -131,13 +133,13 @@ void MmsHandler::onOfonoAvailableChanged(bool available)
 
 void MmsHandler::onModemAdded(QString path)
 {
-    DEBUG_("onModemAdded" << path);
+    qCDebug(lcMmsHandler) << "MmsHandler: onModemAdded" << path;
     addModem(path);
 }
 
 void MmsHandler::onModemRemoved(QString path)
 {
-    DEBUG_("onModemRemoved" << path);
+    qCDebug(lcMmsHandler) << "MmsHandler: onModemRemoved" << path;
     delete m_modems.take(path);
 }
 
@@ -155,7 +157,7 @@ void MmsHandler::addModem(const QString &path)
     if (m_modems.contains(path))
         return;
 
-    DEBUG_("addModem" << path);
+    qCDebug(lcMmsHandler) << "MmsHandler: addModem" << path;
 
     MmsHandlerModem *m = new MmsHandlerModem(path, this);
     m_modems.insert(path, m);
@@ -196,7 +198,7 @@ QString MmsHandler::getDefaultVoiceSim() const
             MmsHandlerModem *modem = m_modems.value(path);
             if (modem && modem->sim->isValid()) {
                 QString imsi(modem->sim->subscriberIdentity());
-                DEBUG_("default voice sim for" << path << "is" << imsi);
+                qCDebug(lcMmsHandler) << "default voice sim for" << path << "is" << imsi;
                 return imsi;
             }
         }
@@ -216,15 +218,15 @@ QString MmsHandler::messageNotification(const QString &imsi, const QString &from
 {
     QString modemPath = getModemPath(imsi);
     QString ringAccountPath = accountPath(modemPath);
-    DEBUG_("got MMS message with imsi" << imsi
-           << "modem path" << modemPath
-           << "account path" << ringAccountPath);
+    qCDebug(lcMmsHandler) << "MmsHandler: got MMS message with imsi" << imsi
+                          << "modem path" << modemPath
+                          << "account path" << ringAccountPath;
 
     if (!location.isEmpty()) {
         Event event;
         if (CommHistory::DatabaseIO::instance()->getEventByMmsId(location, event)) {
-            qWarning() << "MMS event" << location <<
-                          "is already in the database, id =" << event.id();
+            qWarning() << "MmsHandler: MMS event" << location
+                       << "is already in the database, id =" << event.id();
             return QString();
         }
     }
@@ -247,7 +249,7 @@ QString MmsHandler::messageNotification(const QString &imsi, const QString &from
     const bool manualDownload = isDataProhibited(modemPath)
                 || !m_imsiSettings->value(imsi + kSettingAutomaticDownload, true).toBool();
 
-    DEBUG_("manualDownload is" << manualDownload);
+    qCDebug(lcMmsHandler) << "MmsHandler: manualDownload is" << manualDownload;
     event.setStatus(manualDownload ? Event::ManualNotificationStatus : Event::WaitingStatus);
 
     if (!setGroupForEvent(event)) {
@@ -268,7 +270,7 @@ QString MmsHandler::messageNotification(const QString &imsi, const QString &from
         NotificationManager::instance()->showNotification(event, from, Group::ChatTypeP2P);
     }
 
-    DEBUG_("Created MMS notification event:" << event.toString());
+    qCDebug(lcMmsHandler) << "MmsHandler: Created MMS notification event:" << event.toString();
     return manualDownload ? QString() : QString::number(event.id());
 }
 
@@ -427,7 +429,8 @@ void MmsHandler::messageReceived(const QString &recId, const QString &mmsId, con
     }
 
     NotificationManager::instance()->showNotification(event, from, Group::ChatTypeP2P);
-    DEBUG_("message " << recId << "received with" << eventParts.size() << "parts:" << event.toString());
+    qCDebug(lcMmsHandler) << "MmsHandler: message " << recId << "received with" << eventParts.size()
+                          << "parts:" << event.toString();
 }
 
 // Caller is responsible for cleaning up copied files on failure
@@ -475,7 +478,7 @@ QString MmsHandler::copyMessagePartFile(const QString &sourcePath, int eventId, 
         }
     }
 
-    DEBUG_(filePath);
+    qCDebug(lcMmsHandler) << "MmsHandler:" << filePath;
     return filePath;
 }
 
@@ -491,7 +494,7 @@ void MmsHandler::messageSendStateChanged(const QString &recId, int state, const 
         Refused
     };
 
-    DEBUG_("message" << recId << "state" << state << details);
+    qCDebug(lcMmsHandler) << "MmsHandler: message" << recId << "state" << state << details;
 
     Event event;
     SingleEventModel model;
@@ -632,7 +635,7 @@ void MmsHandler::readReportSendStatus(const QString &recId, int status)
         ReadReportPermanentError
     };
 
-    DEBUG_(recId << "read report status" << status);
+    qCDebug(lcMmsHandler) << "MmsHandler:" << recId << "read report status" << status;
     if (status != ReadReportTransientError) {
         SingleEventModel model;
         if (model.getEventById(recId.toInt())) {
@@ -794,7 +797,7 @@ Event::EventStatus MmsHandler::sendMessageFromEvent(Event &event)
 
     if (!imsi.isEmpty()) {
         unsigned int flags = m_imsiSettings->value(imsi + kSettingSendFlags, 0).toInt();
-        DEBUG_("send flags are" << flags);
+        qCDebug(lcMmsHandler) << "MmsHandler: send flags are" << flags;
 
         QVariantList args;
         args << event.id() << imsi << event.toList() << event.ccList() << event.bccList()
@@ -886,7 +889,7 @@ void MmsHandler::onStatusChanged(const QString &status)
 {
     QOfonoNetworkRegistration *network = (QOfonoNetworkRegistration*) sender();
 
-    DEBUG_("status changed for" << network->modemPath() << "to" << status);
+    qCDebug(lcMmsHandler) << "MmsHandler: status changed for" << network->modemPath() << "to" << status;
     dataProhibitedChanged(network->modemPath());
 }
 
@@ -894,7 +897,7 @@ void MmsHandler::onRoamingAllowedChanged(bool roaming)
 {
     QOfonoConnectionManager *connection = (QOfonoConnectionManager*) sender();
 
-    DEBUG_("roaming allowed changed for" << connection->modemPath() << "to" << roaming);
+    qCDebug(lcMmsHandler) << "MmsHandler: roaming allowed changed for" << connection->modemPath() << "to" << roaming;
     dataProhibitedChanged(connection->modemPath());
 }
 
@@ -907,12 +910,12 @@ void MmsHandler::eventMarkedAsRead(CommHistory::Event &event)
                 imsi + kSettingSendReadReports, false).toBool();
 
     if (sendReadReports) {
-        DEBUG_("sending read report for" << event.id());
+        qCDebug(lcMmsHandler) << "MmsHandler: sending read report for" << event.id();
         QVariantList args;
         args << event.id() << imsi << event.mmsId() << event.recipients().value(0).remoteUid() << 0;
         callEngine("sendReadReport", args);
     } else {
-        DEBUG_("not allowed to send read report for" << event.id());
+        qCDebug(lcMmsHandler) << "MmsHandler: not allowed to send read report for" << event.id();
         event.removeExtraProperty(MMS_PROPERTY_UNREAD);
         SingleEventModel model;
         if (!model.modifyEvent(event)) {
@@ -924,37 +927,37 @@ void MmsHandler::eventMarkedAsRead(CommHistory::Event &event)
 void MmsHandler::onEventsUpdated(const QList<CommHistory::Event> &events)
 {
     const int count = events.count();
-    DEBUG_(count << "event(s) updated");
+    qCDebug(lcMmsHandler) << "MmsHandler:" << count << "event(s) updated";
 
     for (int i=0; i<count; i++) {
         Event event(events.at(i));
-        DEBUG_(i << ":" << event.toString());
+        qCDebug(lcMmsHandler) << "MmsHandler:" << i << ":" << event.toString();
         if (canSendReadReports(getModemPath(event))) {
             if (MmsReadReportModel::acceptsEvent(event)) {
                 eventMarkedAsRead(event);
             }
         } else if (event.type() == Event::MMSEvent)
-            DEBUG_("can't send read report for" << event.id());
+            qCDebug(lcMmsHandler) << "MmsHandler: can't send read report for" << event.id();
     }
 }
 
 void MmsHandler::onGroupsUpdatedFull(const QList<CommHistory::Group> &groups)
 {
-    DEBUG_(groups.count() << "group(s) updated");
+    qCDebug(lcMmsHandler) << "MmsHandler:" << groups.count() << "group(s) updated";
     for (int i=0; i<groups.count(); i++) {
         Group group(groups.at(i));
-        DEBUG_(i << ":" << group.toString());
+        qCDebug(lcMmsHandler) << "MmsHandler:" << i << ":" << group.toString();
         const int gid = group.id();
         MmsReadReportModel model;
         if (model.getEvents(gid)) {
             const int count = model.count();
-            DEBUG_(count << "MMS event(s) found in group" << gid);
+            qCDebug(lcMmsHandler) << "MmsHandler:" << count << "MMS event(s) found in group" << gid;
             for (int j=0; j<count; j++) {
                 Event event(model.event(j));
                 if (canSendReadReports(getModemPath(event))) {
                     eventMarkedAsRead(event);
                 } else {
-                    DEBUG_("can't send read report at the moment for" << event.id());
+                    qCDebug(lcMmsHandler) << "MmsHandler: can't send read report at the moment for" << event.id();
                 }
             }
         } else {

@@ -178,12 +178,12 @@ void PersonalNotification::publishNotification()
 
     setHasPendingEvents(false);
 
-    DEBUG() << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body();
+    qCDebug(lcCommhistoryd) << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body();
 }
 
 void PersonalNotification::removeNotification()
 {
-    DEBUG() << "removing notification" << m_notification;
+    qCDebug(lcCommhistoryd) << "removing notification" << m_notification;
     if (m_notification) {
         m_notification->close();
         m_notification->deleteLater();

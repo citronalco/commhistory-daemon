@@ -23,7 +23,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <syslog.h>
 #include <unistd.h>
 
 #include <QLocale>
@@ -47,62 +46,27 @@
 #include "smartmessaging.h"
 #include "debug.h"
 
-bool toggleDebug;
+Q_LOGGING_CATEGORY(lcCommhistoryd, "commhistoryd", QtWarningMsg)
 
 using namespace RTComLogger;
 
 namespace {
+bool toggleDebug = false;
 
-void messageHandler(QtMsgType type, const QMessageLogContext &, const QString &message)
+QLoggingCategory::CategoryFilter defaultCategoryFilter;
+
+void categoryFilter(QLoggingCategory *category)
 {
-    if (!toggleDebug)
-        return;
+    defaultCategoryFilter(category);
 
-#ifndef QT_DEBUG
-    if (!(type == QtCriticalMsg || type == QtFatalMsg))
-        return;
-#endif
-
-    const char *logLevel = "";
-    int priority = LOG_DEBUG;
-
-    switch (type) {
-    case QtDebugMsg:
-        // don't use any prefix for debug messages
-        priority = LOG_DEBUG;
-        break;
-    case QtWarningMsg:
-        logLevel = "Warning: ";
-        priority = LOG_WARNING;
-        break;
-    case QtCriticalMsg:
-        logLevel = "CRITICAL: ";
-        priority = LOG_CRIT;
-        break;
-    case QtFatalMsg:
-        logLevel = "FATAL: ";
-        priority = LOG_ALERT;
-        break;
-    default:
-        break;
+    if (QString(category->categoryName()).startsWith("commhistoryd") && toggleDebug) {
+        category->setEnabled(QtDebugMsg, true);
+        category->setEnabled(QtInfoMsg, true);
     }
-
-    const QByteArray &msgData(message.toLocal8Bit());
-    const char *msg = msgData.constData();
-
-    QByteArray timestamp = QLocale::c().toString(QDateTime::currentDateTime(), "ss:zzz").toLocal8Bit();
-    syslog(LOG_MAKEPRI(LOG_USER, priority),
-           "%s [%s] %s",
-           logLevel,
-           timestamp.constData(),
-           msg);
-
-    if (type == QtFatalMsg)
-        abort();
 }
 
 // handle SIGTERM to cleanup on exit
-static int sigtermFd[2];
+int sigtermFd[2];
 
 void termSignalHandler(int)
 {
@@ -129,29 +93,19 @@ void setupSigtermHandler()
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
-    QCoreApplication app(argc, argv);
-
     if (argc > 1) {
-        if (strcmp(argv[1],"-d") == 0) {
+        if (strcmp(argv[1], "-d") == 0) {
             toggleDebug = true;
         }
     }
 
-    int logOption = LOG_NDELAY;
+    defaultCategoryFilter = QLoggingCategory::installFilter(categoryFilter);
 
-#ifdef QT_DEBUG
-    if (app.arguments().contains(QLatin1String("-log-console")))
-        logOption |= LOG_PERROR;
-#endif
-
-    openlog("COMMHISTORYD", logOption, 0);
-
-    qInstallMessageHandler(messageHandler);
-
-    DEBUG() << "MApplication created";
+    QCoreApplication app(argc, argv);
+    qCDebug(lcCommhistoryd) << "Commhistoryd application created";
 
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
-       qFatal("Couldn't create TERM socketpair");
+        qFatal("Couldn't create TERM socketpair");
 
     QSocketNotifier *snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, &app);
     QObject::connect(snTerm, SIGNAL(activated(int)), &app, SLOT(quit()));
@@ -171,7 +125,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
         _exit(1);
     }
     new CommHistoryIfAdaptor(chService);
-    DEBUG() << "CommHistoryService created";
+    qCDebug(lcCommhistoryd) << "CommHistoryService created";
 
     ConnectionUtils *utils = new ConnectionUtils(&app);
 
@@ -184,10 +138,10 @@ Q_DECL_EXPORT int main(int argc, char **argv)
         _exit(1);
     }
     new AccountPresenceIfAdaptor(apService);
-    DEBUG() << "AccountPresenceService created";
+    qCDebug(lcCommhistoryd) << "AccountPresenceService created";
 
     MessageReviver *reviver = new MessageReviver(utils, &app);
-    DEBUG() << "Message reviver created, starting main loop";
+    qCDebug(lcCommhistoryd) << "Message reviver created, starting main loop";
 
     if (toggleDebug) {
         Tp::enableDebug(true);
@@ -196,13 +150,13 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     new Logger(utils->accountManager(),
                reviver,
                &app);
-    DEBUG() << "Logger created";
+    qCDebug(lcCommhistoryd) << "Logger created";
 
     NotificationManager::instance();
-    DEBUG() << "NotificationManager created";
+    qCDebug(lcCommhistoryd) << "NotificationManager created";
 
     new LastDialedCache(&app);
-    DEBUG() << "LastDialedCache created";
+    qCDebug(lcCommhistoryd) << "LastDialedCache created";
 
     // Init account operations observer to monitor account removals and to react to them.
     new AccountOperationsObserver(utils->accountManager(), &app);
@@ -216,7 +170,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     close(sigtermFd[0]);
     close(sigtermFd[1]);
 
-    DEBUG() << "exit";
+    qCDebug(lcCommhistoryd) << "exit";
 
     return result;
 }

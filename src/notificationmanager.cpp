@@ -81,7 +81,7 @@ NotificationManager::~NotificationManager()
 
 void NotificationManager::addModem(QString path)
 {
-    DEBUG() << "NotificationManager::addModem" << path;
+    qCDebug(lcCommhistoryd) << "NotificationManager::addModem" << path;
     QOfonoMessageWaiting *mw = new QOfonoMessageWaiting(this);
     interfaces.insert(path, mw);
 
@@ -92,7 +92,7 @@ void NotificationManager::addModem(QString path)
     connect(mw, SIGNAL(validChanged(bool)), this, SLOT(slotValidChanged(bool)));
 
     if (mw->isValid()) {
-        DEBUG() << "NotificationManager::addModem, mwi interface already valid";
+        qCDebug(lcCommhistoryd) << "NotificationManager::addModem, mwi interface already valid";
         slotVoicemailWaitingChanged();
     }
 }
@@ -123,7 +123,7 @@ void NotificationManager::init()
     connect(ofono, SIGNAL(modemAdded(QString)), this, SLOT(slotModemAdded(QString)));
     connect(ofono, SIGNAL(modemRemoved(QString)), this, SLOT(slotModemRemoved(QString)));
     QStringList modems = ofono->modems();
-    DEBUG() << "Created modem manager";
+    qCDebug(lcCommhistoryd) << "Created modem manager";
     foreach (QString path, modems) {
         addModem(path);
     }
@@ -242,7 +242,7 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
                                            CommHistory::Group::ChatType chatType,
                                            const QString &details)
 {
-    DEBUG() << Q_FUNC_INFO << event.id() << channelTargetId << chatType;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << event.id() << channelTargetId << chatType;
 
     if (event.type() == CommHistory::Event::SMSEvent
         || event.type() == CommHistory::Event::MMSEvent
@@ -262,7 +262,7 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
                 } else {
                     ngfEvent = &NgfdEventChat;
                 }
-                DEBUG() << Q_FUNC_INFO << "play ngf event: " << ngfEvent;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "play ngf event: " << ngfEvent;
                 m_ngfEvent = m_ngfClient->play(*ngfEvent, properties);
             }
 
@@ -287,7 +287,7 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
                 chatName = group.chatName();
                 if (chatName.isEmpty())
                     chatName = txt_qtn_msg_group_chat;
-                DEBUG() << Q_FUNC_INFO << "Using chatName:" << chatName;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Using chatName:" << chatName;
                 break;
             }
         }
@@ -335,7 +335,7 @@ void NotificationManager::resolveNotification(PersonalNotification *pn)
         // Add notification immediately
         addNotification(pn);
     } else {
-        DEBUG() << Q_FUNC_INFO << "Trying to resolve contact for" << pn->account() << pn->remoteUid();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Trying to resolve contact for" << pn->account() << pn->remoteUid();
         m_unresolvedNotifications.append(pn);
         m_contactResolver->add(pn->recipient());
     }
@@ -423,7 +423,7 @@ static void removeListNotifications(
 
 void NotificationManager::removeNotifications(const QString &accountPath, const QList<int> &removeTypes)
 {
-    DEBUG() << Q_FUNC_INFO << "Removing notifications of account " << accountPath;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Removing notifications of account " << accountPath;
 
     // remove matched notifications
     removeListNotifications(&m_notifications, accountPath, removeTypes);
@@ -453,7 +453,7 @@ void NotificationManager::slotObservedConversationsChanged(const QList<CommHisto
 
 void NotificationManager::slotInboxObservedChanged()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     // Cannot be passed as a parameter, because this slot is also used for m_notificationTimer
     bool observed = CommHistoryService::instance()->inboxObserved();
@@ -467,7 +467,7 @@ void NotificationManager::slotInboxObservedChanged()
         } else {
             // Filtering is in use, remove only notifications of that account whose threads are visible in inbox:
             QString filteredAccountPath = filteredInboxAccountPath();
-            DEBUG() << Q_FUNC_INFO << "Removing only notifications belonging to account " << filteredAccountPath;
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Removing only notifications belonging to account " << filteredAccountPath;
             if (!filteredAccountPath.isEmpty())
                 removeNotifications(filteredAccountPath, removeTypes);
         }
@@ -503,7 +503,7 @@ void NotificationManager::removeNotificationToken(const QString &token)
 
 void NotificationManager::removeNotificationTypes(const QList<int> &types)
 {
-    DEBUG() << Q_FUNC_INFO << types;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << types;
 
     auto eraseFrom = std::find_if(m_notifications.begin(), m_notifications.end(), [&](PersonalNotification *notification) {
         return types.contains(notification->eventType());
@@ -738,11 +738,11 @@ void NotificationManager::setNotificationProperties(Notification *notification, 
 
 void NotificationManager::slotContactResolveFinished()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     // All events are now resolved
     foreach (PersonalNotification *notification, m_unresolvedNotifications) {
-        DEBUG() << "Resolved contact for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+        qCDebug(lcCommhistoryd) << "Resolved contact for notification" << notification->account() << notification->remoteUid() << notification->contactId();
         notification->updateRecipientData();
         addNotification(notification);
     }
@@ -752,12 +752,12 @@ void NotificationManager::slotContactResolveFinished()
 
 void NotificationManager::slotContactChanged(const RecipientList &recipients)
 {
-    DEBUG() << Q_FUNC_INFO << recipients;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << recipients;
 
     // Check all existing notifications and update if necessary
     foreach (PersonalNotification *notification, m_notifications) {
         if (recipients.contains(notification->recipient())) {
-            DEBUG() << "Contact changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+            qCDebug(lcCommhistoryd) << "Contact changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
             notification->updateRecipientData();
         }
     }
@@ -765,12 +765,12 @@ void NotificationManager::slotContactChanged(const RecipientList &recipients)
 
 void NotificationManager::slotContactInfoChanged(const RecipientList &recipients)
 {
-    DEBUG() << Q_FUNC_INFO << recipients;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << recipients;
 
     // Check all existing notifications and update if necessary
     foreach (PersonalNotification *notification, m_notifications) {
         if (recipients.contains(notification->recipient())) {
-            DEBUG() << "Contact info changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+            qCDebug(lcCommhistoryd) << "Contact info changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
             notification->updateRecipientData();
         }
     }
@@ -806,7 +806,7 @@ CommHistory::GroupModel* NotificationManager::groupModel()
 
 void NotificationManager::slotGroupRemoved(const QModelIndex &index, int start, int end)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
     for (int i = start; i <= end; i++) {
         QModelIndex row = m_GroupModel->index(i, 0, index);
         Group group = m_GroupModel->group(row);
@@ -823,7 +823,7 @@ void NotificationManager::showVoicemailNotification(int count)
 
 void NotificationManager::slotGroupDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     // Update MUC notifications if MUC topic has changed
     for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
@@ -844,7 +844,7 @@ void NotificationManager::slotGroupDataChanged(const QModelIndex &topLeft, const
                             newChatName = group.chatName();
 
                         if (!newChatName.isEmpty()) {
-                            DEBUG() << Q_FUNC_INFO << "Changing chat name to" << newChatName;
+                            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Changing chat name to" << newChatName;
                             pn->setChatName(newChatName);
                         }
                     }
@@ -866,7 +866,7 @@ void NotificationManager::slotVoicemailWaitingChanged()
     const bool waiting(mw->voicemailWaiting());
     const int messageCount(mw->voicemailMessageCount());
 
-    DEBUG() << Q_FUNC_INFO << waiting << messageCount;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << waiting << messageCount;
 
     uint currentId = 0;
 
@@ -878,10 +878,10 @@ void NotificationManager::slotVoicemailWaitingChanged()
             if (waiting) {
                 // The notification is already present; do nothing
                 currentId = n->replacesId();
-                DEBUG() << "Extant voicemail waiting notification:" << n->replacesId();
+                qCDebug(lcCommhistoryd) << "Extant voicemail waiting notification:" << n->replacesId();
             } else {
                 // Close this notification
-                DEBUG() << "Closing voicemail waiting notification:" << n->replacesId();
+                qCDebug(lcCommhistoryd) << "Closing voicemail waiting notification:" << n->replacesId();
                 n->close();
             }
         }
@@ -933,13 +933,13 @@ void NotificationManager::slotVoicemailWaitingChanged()
 
         voicemailNotification.setReplacesId(currentId);
         voicemailNotification.publish();
-        DEBUG() << (currentId ? "Updated" : "Created") << "voicemail waiting notification:" << voicemailNotification.replacesId();
+        qCDebug(lcCommhistoryd) << (currentId ? "Updated" : "Created") << "voicemail waiting notification:" << voicemailNotification.replacesId();
     }
 }
 
 void NotificationManager::slotModemsChanged(QStringList modems)
 {
-    DEBUG() << "NotificationManager::slotModemsChanged";
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotModemsChanged";
     qDeleteAll(interfaces.values());
     interfaces.clear();
     foreach (QString path, modems)
@@ -948,20 +948,20 @@ void NotificationManager::slotModemsChanged(QStringList modems)
 
 void NotificationManager::slotModemAdded(QString path)
 {
-    DEBUG() << "NotificationManager::slotModemAdded: " << path;
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotModemAdded: " << path;
     delete interfaces.take(path);
     addModem(path);
 }
 
 void NotificationManager::slotModemRemoved(QString path)
 {
-    DEBUG() << "NotificationManager::slotModemRemoved: " << path;
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotModemRemoved: " << path;
     delete interfaces.take(path);
 }
 
 void NotificationManager::slotValidChanged(bool valid)
 {
-    DEBUG() << "NotificationManager::slotValidChanged to: " << valid;
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotValidChanged to: " << valid;
     QOfonoMessageWaiting *mw = (QOfonoMessageWaiting*)sender();
     if (mw->isValid()) {
         slotVoicemailWaitingChanged();

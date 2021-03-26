@@ -24,7 +24,8 @@
 #define DEBUG_H
 
 #include <QDebug>
+#include <QLoggingCategory>
 
-#define DEBUG qDebug
+Q_DECLARE_LOGGING_CATEGORY(lcCommhistoryd)
 
 #endif // DEBUG_H

@@ -41,7 +41,7 @@ ContactAuthorizationListener::ContactAuthorizationListener(ConnectionUtils *conn
     QObject(parent),
     m_pConnectionUtils(connectionUtils)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     connect(m_pConnectionUtils,
             SIGNAL(connectionReady(Tp::ConnectionPtr)),
@@ -68,12 +68,12 @@ ContactAuthorizationListener::ContactAuthorizationListener(ConnectionUtils *conn
 
 ContactAuthorizationListener::~ContactAuthorizationListener()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 }
 
 void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& connection)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if(!connection)
         return;
@@ -82,7 +82,7 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
     Tp::AccountManagerPtr accountManager = m_pConnectionUtils->accountManager();
 
     if(accountManager && accountManager->isReady()) {
-        DEBUG() << Q_FUNC_INFO << "Connection object path: " << connection->objectPath();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection object path: " << connection->objectPath();
 #if 1
         foreach (Tp::AccountPtr a, accountManager->validAccounts()->accounts()) {
             if (a->connection() && a->connection()->objectPath() == connection->objectPath()) {
@@ -106,7 +106,7 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
         // Create ContactAuthorizer only for IM accounts:
         if (connection->actualFeatures().contains(Tp::Connection::FeatureSimplePresence))
         {
-            DEBUG() << Q_FUNC_INFO << "Creating ContactAuthorizer for " << account->uniqueIdentifier();
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Creating ContactAuthorizer for " << account->uniqueIdentifier();
             /* After connection is ready we need to listen account's connection status changes so that we can
                instantiate ContactAuthorizer again when account goes from offline (ContactAuthorizer destroyed then)
                state to online state: */
@@ -148,7 +148,7 @@ void ContactAuthorizationListener::slotConnectionReady(const Tp::ConnectionPtr& 
 
 void ContactAuthorizationListener::slotRemoveAuthorizer(QObject *removedAuthorizer)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if (removedAuthorizer) {
         QMutableMapIterator<QString,ContactAuthorizer*> i(m_authorizers);
@@ -163,21 +163,21 @@ void ContactAuthorizationListener::slotRemoveAuthorizer(QObject *removedAuthoriz
 
 void ContactAuthorizationListener::slotAccountConnectionStatusChanged(Tp::ConnectionStatus connectionStatus)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Tp::Account *account = qobject_cast<Tp::Account *>(sender());
 
     if(account != 0 && account->isValid()) {
         if (connectionStatus == Tp::ConnectionStatusConnected) {
             if (!m_authorizers.contains(account->uniqueIdentifier())) {
-                DEBUG() << Q_FUNC_INFO << "Connection status changed to Connected";
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection status changed to Connected";
                 Tp::ConnectionPtr connection = account->connection();
                 if (!connection.isNull() && connection->isValid()) {
                     if (connection->isReady()) {
-                        DEBUG() << Q_FUNC_INFO << "Connection is ready";
+                        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection is ready";
                         slotConnectionReady(connection);
                     } else {
-                        DEBUG() << Q_FUNC_INFO << "Asking connection to become ready";
+                        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Asking connection to become ready";
                         connect(connection->becomeReady(Tp::Connection::FeatureSimplePresence),
                                 SIGNAL(finished(Tp::PendingOperation*)),
                                 m_pConnectionUtils,
@@ -185,14 +185,14 @@ void ContactAuthorizationListener::slotAccountConnectionStatusChanged(Tp::Connec
                     }
                 }
             } else {
-                DEBUG() << Q_FUNC_INFO << "ContactAuthorizer for account " << account->uniqueIdentifier() << " already exists.";
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "ContactAuthorizer for account " << account->uniqueIdentifier() << " already exists.";
             }
         } else if (connectionStatus == Tp::ConnectionStatusDisconnected) {
-            DEBUG() << Q_FUNC_INFO << "Connection status changed to disconnected";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection status changed to disconnected";
         } else if (connectionStatus == Tp::ConnectionStatusConnecting) {
-            DEBUG() << Q_FUNC_INFO << "Connection status changed to connecting...";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Connection status changed to connecting...";
         } else {
-            DEBUG() << Q_FUNC_INFO << "Unknown connection status!";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Unknown connection status!";
         }
     }
 }
@@ -210,7 +210,7 @@ void ContactAuthorizationListener::slotShowUnableToAuthorizeDialog(const QString
     Q_UNUSED(unused4)
     Q_UNUSED(unused5)
 
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if (m_pConnectionUtils == NULL) {
         qWarning() << "ConnectionUtils is NULL.";
@@ -224,7 +224,7 @@ void ContactAuthorizationListener::slotShowUnableToAuthorizeDialog(const QString
         QVariantMap filter;
         filter.insert(QLatin1String("uniqueIdentifier"), accountUniqueIdentifier);
         Tp::AccountSetPtr accountSet = accountManager->filterAccounts(filter);
-        DEBUG() << "Finding out if account is online: " << accountUniqueIdentifier;
+        qCDebug(lcCommhistoryd) << "Finding out if account is online: " << accountUniqueIdentifier;
         if (!accountSet->accounts().isEmpty()) {
             Tp::AccountPtr account = accountSet->accounts().first();
 
@@ -234,15 +234,15 @@ void ContactAuthorizationListener::slotShowUnableToAuthorizeDialog(const QString
             }
 
             if (account->connectionStatus() == Tp::ConnectionStatusConnected) {
-                DEBUG() << "Nothing to do here: the account is online.";
+                qCDebug(lcCommhistoryd) << "Nothing to do here: the account is online.";
             } else {
-                DEBUG() << "The account is offline: cannot authorize anyway.";
+                qCDebug(lcCommhistoryd) << "The account is offline: cannot authorize anyway.";
                 showNotification = true;
                 accountPath = account->objectPath();
             }
         }
     } else {
-        DEBUG() << "Nothing to do here: the account manager is not even ready!";
+        qCDebug(lcCommhistoryd) << "Nothing to do here: the account manager is not even ready!";
         showNotification = true;
     }
 
@@ -261,7 +261,7 @@ void ContactAuthorizationListener::slotShowUnableToAuthorizeDialog(const QString
 
 void ContactAuthorizationListener::slotAccountStateChanged(bool isEnabled)
 {
-    DEBUG() << Q_FUNC_INFO << isEnabled;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << isEnabled;
 
     // remove buddy authorization notifications when account is disabled
     // sure we will lose them and not be able to see them when the account is
@@ -273,7 +273,7 @@ void ContactAuthorizationListener::slotAccountStateChanged(bool isEnabled)
 void ContactAuthorizationListener::slotAccountRemoved() {
     // We need to remove the ongoing notifications for this account
 
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Tp::Account *account = qobject_cast<Tp::Account*>(sender());
 

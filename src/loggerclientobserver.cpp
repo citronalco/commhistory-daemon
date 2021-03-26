@@ -51,7 +51,7 @@ void LoggerClientObserver::observeChannels(const Tp::MethodInvocationContextPtr<
     Q_UNUSED(observerInfo)
     Q_UNUSED(connection)
 
-    DEBUG() << "LoggerClientObserver::observeChannels";
+    qCDebug(lcCommhistoryd) << "LoggerClientObserver::observeChannels";
 
     if(m_pLogger) {
         foreach(Tp::ChannelPtr channel, channels) {

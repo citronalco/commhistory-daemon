@@ -86,7 +86,7 @@ bool MessageHandlerBase::setGroupForEvent(Event& event)
         return true;
     }
 
-    DEBUG() << "Creating new group for event" << event.recipients().value(0).remoteUid();
+    qCDebug(lcCommhistoryd) << "Creating new group for event" << event.recipients().value(0).remoteUid();
     Group newGroup;
     newGroup.setLocalUid(event.localUid());
     newGroup.setRecipients(Recipient(event.localUid(), event.recipients().value(0).remoteUid()));

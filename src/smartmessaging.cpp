@@ -26,13 +26,15 @@
 #include <CommHistory/event.h>
 #include <CommHistory/messagepart.h>
 
+#include <QLoggingCategory>
+
 #define AGENT_PATH          "/commhistoryd/SmartMessagingAgent"
 #define AGENT_SERVICE       "org.ofono.SmartMessagingAgent"
 
 #define VCARD_CONTENT_TYPE  "text/x-vcard"
 #define VCARD_EXTENSION     "vcf"
 
-#define DEBUG_(x) qDebug() << "SmartMessaging:" << x
+Q_LOGGING_CATEGORY(lcSmartMessaging, "commhistoryd.smartmessaging", QtWarningMsg)
 
 using namespace CommHistory;
 using namespace RTComLogger;
@@ -44,7 +46,7 @@ SmartMessaging::SmartMessaging(QObject* parent) :
     QOfonoManager* ofono = ofonoManager.data();
     connect(ofono, SIGNAL(modemAdded(QString)), this, SLOT(onModemAdded(QString)));
     connect(ofono, SIGNAL(modemRemoved(QString)), this, SLOT(onModemRemoved(QString)));
-    DEBUG_("created");
+    qCDebug(lcSmartMessaging) << "SmartMessaging created";
 
     if (ofono->available()) {
         addAllModems();
@@ -60,7 +62,7 @@ SmartMessaging::~SmartMessaging()
 
 void SmartMessaging::onOfonoAvailableChanged(bool available)
 {
-    DEBUG_("ofono available changed to" << available);
+    qCDebug(lcSmartMessaging) << "SmartMessaging: ofono available changed to" << available;
     if (available) {
         addAllModems();
     } else {
@@ -75,7 +77,7 @@ void SmartMessaging::onOfonoAvailableChanged(bool available)
 void SmartMessaging::setup(const QString &path)
 {
     if (path.isEmpty()) {
-        qWarning() << "Empty modem path.";
+        qWarning() << "SmartMessaging: Empty modem path.";
         return;
     }
 
@@ -86,7 +88,7 @@ void SmartMessaging::setup(const QString &path)
     sm = interfaces[path];
     agent = agents[agentPath];
 
-    DEBUG_("setup: registering agent" << agentPath << "for" << path);
+    qCDebug(lcSmartMessaging) << "SmartMessaging setup: registering agent" << agentPath << "for" << path;
     sm->registerAgent(agentPath);
     agent->setAgentPath(agentPath);
     connect(agent, SIGNAL(receiveBusinessCard(const QByteArray&, const QVariantMap&)),
@@ -101,7 +103,7 @@ void SmartMessaging::addAllModems()
 {
     QStringList modems = ofonoManager->modems();
     foreach (QString path, modems) {
-        DEBUG_("modem" << path);
+        qCDebug(lcSmartMessaging) << "SmartMessaging: modem" << path;
         addModem(path);
     }
 }
@@ -128,14 +130,14 @@ void SmartMessaging::addModem(QString path)
 
 void SmartMessaging::onModemAdded(QString path)
 {
-    DEBUG_("onModemAdded" << path);
+    qCDebug(lcSmartMessaging) << "SmartMessaging: onModemAdded" << path;
     delete interfaces.take(path);
     addModem(path);
 }
 
 void SmartMessaging::onModemRemoved(QString path)
 {
-    DEBUG_("onModemRemoved" << path);
+    qCDebug(lcSmartMessaging) << "SmartMessaging: onModemRemoved" << path;
     QString agentPath = agentPathFromModem(path);
     agentToModemPaths.remove(agentPath);
     delete interfaces.take(path);
@@ -158,13 +160,13 @@ void SmartMessaging::onValidChanged(bool valid)
     if (valid) {
         setup(sm->modemPath());
     } else {
-        DEBUG_("no agent for " << sm->modemPath());
+        qCDebug(lcSmartMessaging) << "SmartMessaging: no agent for " << sm->modemPath();
     }
 }
 
 void SmartMessaging::onReceiveAppointment(const QByteArray &vcard, const QVariantMap &info)
 {
-    DEBUG_("ReceiveAppointment");
+    qCDebug(lcSmartMessaging) << "SmartMessaging: ReceiveAppointment";
 }
 
 void SmartMessaging::onReceiveBusinessCard(const QByteArray &vcard, const QVariantMap &info)
@@ -172,7 +174,8 @@ void SmartMessaging::onReceiveBusinessCard(const QByteArray &vcard, const QVaria
     QOfonoSmartMessagingAgent* agent = (QOfonoSmartMessagingAgent*) sender();
 
     QString from = info.value("Sender").toString();
-    DEBUG_("onReceiveBusinessCard to" << agent->agentPath() << ":" << vcard.length() << "bytes from" << from);
+    qCDebug(lcSmartMessaging) << "SmartMessaging: onReceiveBusinessCard to" << agent->agentPath() << ":"
+                              << vcard.length() << "bytes from" << from;
     if (vcard.isEmpty()) {
         qWarning() << "Empty vcard";
         return;
@@ -219,7 +222,7 @@ void SmartMessaging::onReceiveBusinessCard(const QByteArray &vcard, const QVaria
 
 void SmartMessaging::onRelease()
 {
-    DEBUG_("Release");
+    qCDebug(lcSmartMessaging) << "SmartMessaging: Release";
 }
 
 bool SmartMessaging::save(int id, QByteArray vcard, MessagePart& part)
@@ -232,7 +235,7 @@ bool SmartMessaging::save(int id, QByteArray vcard, MessagePart& part)
             QFile file(path);
             if (file.open(QIODevice::WriteOnly)) {
                 if (file.write(vcard) == vcard.size()) {
-                    DEBUG_("Stored vCard to" << path);
+                    qCDebug(lcSmartMessaging) << "SmartMessaging: Stored vCard to" << path;
                     part.setContentType(VCARD_CONTENT_TYPE);
                     part.setContentId(contentId);
                     part.setPath(path);
@@ -242,7 +245,7 @@ bool SmartMessaging::save(int id, QByteArray vcard, MessagePart& part)
             }
         }
     } else {
-        qWarning () << "Empty vcard";
+        qWarning() << "Empty vcard";
     }
     return ok;
 }

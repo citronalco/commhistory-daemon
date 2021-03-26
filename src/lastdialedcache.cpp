@@ -82,7 +82,7 @@ void LastDialedCache::writeLastDialed(const QString &number)
         return;
     }
 
-    DEBUG() << "Writing last dialed number to file:" << number;
+    qCDebug(lcCommhistoryd) << "Writing last dialed number to file:" << number;
     file.write(number.toLatin1());
     if (!file.commit())
         qWarning() << "Writing last dialed cache failed:" << file.errorString();
@@ -90,7 +90,7 @@ void LastDialedCache::writeLastDialed(const QString &number)
 
 void LastDialedCache::removeLastDialed()
 {
-    DEBUG() << "Removing last dialed number file";
+    qCDebug(lcCommhistoryd) << "Removing last dialed number file";
     QFile::remove(filePath);
 }
 

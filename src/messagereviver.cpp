@@ -103,7 +103,7 @@ void MessageReviver::updateTokens(const QStringList &tokens,
     bool modified = false;
 
     if (connection.isNull() || !connection->isValid()) {
-        DEBUG() << "Connection is not valid anymore, abort";
+        qCDebug(lcCommhistoryd) << "Connection is not valid anymore, abort";
         return;
     }
 
@@ -156,10 +156,10 @@ void MessageReviver::handleMessages(Tp::ConnectionPtr &connection)
     foreach (QString token, messageTokens) {
         Event event;
         if (model.databaseIO().getEventByMessageToken(token, event)) {
-            DEBUG() << "bury " << token;
+            qCDebug(lcCommhistoryd) << "bury " << token;
             toBury << token;
         } else {
-            DEBUG() << "revive " << token;
+            qCDebug(lcCommhistoryd) << "revive " << token;
             toRevive << token;
         }
     }

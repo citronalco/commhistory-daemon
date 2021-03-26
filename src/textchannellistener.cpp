@@ -230,14 +230,14 @@ TextChannelListener::TextChannelListener(const Tp::AccountPtr &account,
       m_FailedSaveCount(0),
       m_pConversationModel(0)
 {
-    DEBUG() << __PRETTY_FUNCTION__;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
     makeChannelReady(Tp::TextChannel::FeatureMessageQueue
                      | Tp::TextChannel::FeatureMessageSentSignal);
 }
 
 void TextChannelListener::channelListenerReady()
 {
-    DEBUG() << __PRETTY_FUNCTION__;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
 
     if (m_IsGroupChat)
         handleTpProperties();
@@ -266,7 +266,7 @@ void TextChannelListener::channelListenerReady()
 
         QVariant property = properties.value(TP_QT_IFACE_CHANNEL_INTERFACE_SMS + QLatin1String(".Flash"), QVariant());
         if(property.isValid() && property.value<bool>() == true) {
-            DEBUG() << __FUNCTION__ << "Channel contains class 0 property";
+            qCDebug(lcCommhistoryd) << __FUNCTION__ << "Channel contains class 0 property";
             m_isClassZeroSMS = true;
         }
 
@@ -350,20 +350,20 @@ void TextChannelListener::slotGroupDataChanged(const QModelIndex &topLeft, const
 
 void TextChannelListener::slotGroupInserted(const QModelIndex &index, int start, int end)
 {
-    DEBUG() << Q_FUNC_INFO << "Account path handled by this listener: " << m_Account->objectPath();
-    DEBUG() << Q_FUNC_INFO << "Target handled by this listener: " << targetId();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Account path handled by this listener: " << m_Account->objectPath();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Target handled by this listener: " << targetId();
 
     updateCurrentGroup(start, end, index);
 }
 
 void TextChannelListener::slotGroupRemoved(const QModelIndex &index, int start, int end)
 {
-    DEBUG() << Q_FUNC_INFO << "Account path handled by this listener: " << m_Account->objectPath();
-    DEBUG() << Q_FUNC_INFO << "Target handled by this listener: " << targetId();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Account path handled by this listener: " << m_Account->objectPath();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Target handled by this listener: " << targetId();
 
     if (!m_Group.isValid())
     {
-        DEBUG() << Q_FUNC_INFO << "Group is not valid!";
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Group is not valid!";
         return;
     }
 
@@ -371,7 +371,7 @@ void TextChannelListener::slotGroupRemoved(const QModelIndex &index, int start, 
         QModelIndex row = m_GroupModel->index(i, 0, index);
         CommHistory::Group group = m_GroupModel->group(row);
         if (group == m_Group) {
-            DEBUG() << Q_FUNC_INFO << "Removed group belongs to this listener!";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Removed group belongs to this listener!";
             m_Group.setId(-1); // Invalidate the current group in this listener.
             break;
         }
@@ -380,9 +380,9 @@ void TextChannelListener::slotGroupRemoved(const QModelIndex &index, int start, 
 
 int TextChannelListener::groupId()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
     if (!m_Group.isValid()) {
-        DEBUG() << Q_FUNC_INFO << "Group is not valid!";
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Group is not valid!";
 
         if (m_GroupModel->isReady()
             && m_Account) { // m_Account not need to be ready
@@ -390,7 +390,7 @@ int TextChannelListener::groupId()
             CommHistory::Group group;
             group.setLocalUid(m_Account->objectPath());
 
-            DEBUG() << Q_FUNC_INFO << targetId();
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << targetId();
             group.setRecipients(Recipient(m_Account->objectPath(), targetId()));
 
             if (m_IsGroupChat) {
@@ -413,7 +413,7 @@ int TextChannelListener::groupId()
             else {
 
                 m_Group = group;
-                DEBUG() << Q_FUNC_INFO << "added new group:" << m_Group.id();
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "added new group:" << m_Group.id();
             }
         }
         else {
@@ -439,7 +439,7 @@ void TextChannelListener::handleTpProperties()
 
 void TextChannelListener::slotListPropertiesFinished(QDBusPendingCallWatcher *watcher)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     QDBusPendingReply<Tp::PropertySpecList> reply = *watcher;
     if (!reply.isValid()) {
@@ -464,7 +464,7 @@ void TextChannelListener::slotListPropertiesFinished(QDBusPendingCallWatcher *wa
         && (m_Properties.value(CHANNEL_PROPERTY_SUBJECT_CONTACT).flags & Tp::PropertyFlagRead))
         propIds << m_Properties.value(CHANNEL_PROPERTY_SUBJECT_CONTACT).propertyID;
 
-    DEBUG() << Q_FUNC_INFO << propIds;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << propIds;
 
     if (!propIds.isEmpty()) {
         QDBusPendingCall getPropertyCall = m_PropertiesIf->GetProperties(propIds);
@@ -480,7 +480,7 @@ void TextChannelListener::slotGetPropertiesFinished(QDBusPendingCallWatcher *wat
 {
     QDBusPendingReply<Tp::PropertyValueList> reply = *watcher;
     if (!reply.isValid()) {
-        DEBUG() << Q_FUNC_INFO << "GetProperties failed:" << reply.error();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "GetProperties failed:" << reply.error();
         watcher->deleteLater();
         return;
     }
@@ -490,7 +490,7 @@ void TextChannelListener::slotGetPropertiesFinished(QDBusPendingCallWatcher *wat
 
 void TextChannelListener::slotOnModelReady(bool status)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << m_Account->objectPath() << targetId();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << m_Account->objectPath() << targetId();
 
     disconnect(m_GroupModel, SIGNAL(modelReady(bool)),
                this, SLOT(slotOnModelReady(bool)));
@@ -513,22 +513,22 @@ void TextChannelListener::slotOnModelReady(bool status)
 void TextChannelListener::slotMessageReceived(const Tp::ReceivedMessage &message)
 {
     Q_UNUSED(message);
-    DEBUG() << __PRETTY_FUNCTION__;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
 
     handleMessages();
 }
 
 void TextChannelListener::slotPendingMessageRemoved(const Tp::ReceivedMessage &message)
 {
-    DEBUG() << __PRETTY_FUNCTION__;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__;
 
     uint id = pendingId(message);
 
-    DEBUG() << __PRETTY_FUNCTION__ << "Pending message (pending id = " << id << ") having content "
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Pending message (pending id = " << id << ") having content "
              << message.text() << " acked and removed from channel's message queue.";
 
     if (m_pendingMessageIds.remove(m_Channel->objectPath(), id) > 0) {
-        DEBUG() << __PRETTY_FUNCTION__ << "Removing message from channel " << m_Channel->objectPath()
+        qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Removing message from channel " << m_Channel->objectPath()
                  << " having pending id " << id << " from pending messages list of all text channel listeners";
     }
 }
@@ -562,14 +562,14 @@ void TextChannelListener::handleMessages()
         }
     }
 
-    DEBUG() << __PRETTY_FUNCTION__ << "Number of messages in local message queue: " << m_messageQueue.size();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Number of messages in local message queue: " << m_messageQueue.size();
 
     foreach(Tp::ReceivedMessage message, m_messageQueue) {
         CommHistory::Event event;
         Tp::ChannelTextMessageType type = message.messageType();
         bool wait = false;
 
-        DEBUG() << __PRETTY_FUNCTION__ << "Handling message from channel " << m_Channel->objectPath()
+        qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Handling message from channel " << m_Channel->objectPath()
                  << " with content " << message.text() << " and with pending id " << pendingId(message);
 
         switch (type) {
@@ -594,7 +594,7 @@ void TextChannelListener::handleMessages()
                     modifyTokens[groupId].insertMulti(event.id(), token);
 
                 } else {
-                    DEBUG() << __PRETTY_FUNCTION__ << "Ignoring recovered message from delivery echo";
+                    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "Ignoring recovered message from delivery echo";
                 }
 
                 break;
@@ -618,14 +618,14 @@ void TextChannelListener::handleMessages()
 
             // class 0 sms
             if (m_isClassZeroSMS) {
-                DEBUG() << __FUNCTION__ << "Handling class 0 sms";
+                qCDebug(lcCommhistoryd) << __FUNCTION__ << "Handling class 0 sms";
                 processedMessages << message;
                 nManager->playClass0SMSAlert();
                 nManager->requestClass0Notification(event);
                 expungeMessage(event.messageToken());
             // Replace sms
             } else if (!replaceTypeValue.isEmpty()) {
-                DEBUG() << __FUNCTION__ << "Replace type of sms";
+                qCDebug(lcCommhistoryd) << __FUNCTION__ << "Replace type of sms";
                 m_replaceEvents << event;
                 m_replaceMessages << message;
                 hasReplaceMessage = true;
@@ -724,7 +724,7 @@ void TextChannelListener::handleMessages()
         break;
         }
         default:
-            DEBUG() << "onMessageReceived: type " << type << " not supported";
+            qCDebug(lcCommhistoryd) << "onMessageReceived: type " << type << " not supported";
             break;
         }
 
@@ -792,7 +792,7 @@ CommHistory::ConversationModel& TextChannelListener::conversationModel()
 
 void TextChannelListener::slotConvModelReady(bool success)
 {
-    DEBUG() << __FUNCTION__;
+    qCDebug(lcCommhistoryd) << __FUNCTION__;
 
     if (success && !m_replaceEvents.isEmpty()) {
         CommHistory::Event event = m_replaceEvents.takeFirst();
@@ -814,7 +814,7 @@ void TextChannelListener::slotConvModelReady(bool success)
 
 void TextChannelListener::slotConvEventsCommitted(const QList<CommHistory::Event> &events, bool success)
 {
-    DEBUG() << __FUNCTION__;
+    qCDebug(lcCommhistoryd) << __FUNCTION__;
 
     disconnect(&conversationModel(), SIGNAL(eventsCommitted(const QList<CommHistory::Event> &, bool)),
             this, SLOT(slotConvEventsCommitted(const QList<CommHistory::Event> &, bool)));
@@ -912,7 +912,7 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
 {
     DeliveryHandlingStatus result = DeliveryHandlingFailed;
 
-    DEBUG() << "[DELIVERY] Handling delivery report";
+    qCDebug(lcCommhistoryd) << "[DELIVERY] Handling delivery report";
     if (message.messageToken().isNull()) {
         qWarning() << "[DELIVERY] Trying to handler delivery report, while message token is empty";
         return result;
@@ -929,10 +929,10 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         qWarning() << "[DELIVERY] Cannot fetch delivery token";
     }
 
-    DEBUG() << "[DELIVERY] Message token is: " << deliveryToken;
+    qCDebug(lcCommhistoryd) << "[DELIVERY] Message token is: " << deliveryToken;
 
     if (pendingCommit(deliveryToken)) {
-        DEBUG() << "[DELIVERY] Original message is not committed yet, wait for it";
+        qCDebug(lcCommhistoryd) << "[DELIVERY] Original message is not committed yet, wait for it";
         return DeliveryHandlingPending;
     }
 
@@ -967,7 +967,7 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
 
             event.setReportDelivery(true);
 
-            DEBUG() << "Message recovered from delivery-echo" << event.toString();
+            qCDebug(lcCommhistoryd) << "Message recovered from delivery-echo" << event.toString();
         }
     }
 
@@ -977,7 +977,7 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         return result;
     }
 
-    DEBUG() << "[DELIVERY] Event match: id:" << event.id()
+    qCDebug(lcCommhistoryd) << "[DELIVERY] Event match: id:" << event.id()
              << "token:" << event.messageToken();
 
     // If variant is not valid, then we cant update status
@@ -993,7 +993,7 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
         deliveryTime = QDateTime::currentDateTime();
 
     int deliveryStatus = status.value<int>();
-    DEBUG() << "[DELIVERY] Message delivery status: " << deliveryStatus;
+    qCDebug(lcCommhistoryd) << "[DELIVERY] Message delivery status: " << deliveryStatus;
 
 
     if ((deliveryStatus == Tp::DeliveryStatusRead)
@@ -1071,7 +1071,7 @@ bool TextChannelListener::areRemotePartiesOffline()
 void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message,
                                               const CommHistory::Event &event)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << "message type:" << message.messageType();
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << "message type:" << message.messageType();
 
     // if the received message is a delivery report
     if (message.messageType() == Tp::ChannelTextMessageTypeDeliveryReport) {
@@ -1083,7 +1083,7 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
         QString dbusError = part.value(DELIVERY_DBUSERROR).variant().toString();
         QString errorMessage = part.value(DELIVERY_ERRORMESSAGE).variant().toString();
 
-        DEBUG() << "status:"        << status
+        qCDebug(lcCommhistoryd) << "status:"        << status
                  << "message token:" << messageToken
                  << "dbus error:"    << dbusError
                  << "error message:" << errorMessage;
@@ -1143,7 +1143,7 @@ void TextChannelListener::handleMessageFailed(const Tp::ReceivedMessage &message
                 category = ErrorCategory;
             }
 
-            DEBUG() << "error message shown to user:" << errorMsgToUser;
+            qCDebug(lcCommhistoryd) << "error message shown to user:" << errorMsgToUser;
             showErrorNote(errorMsgToUser, category);
         }
     }
@@ -1207,7 +1207,7 @@ void TextChannelListener::handleReceivedMessage(const Tp::ReceivedMessage &messa
         remoteId = targetId();
     }
 
-    DEBUG() << "Handling received message: " << remoteId << (fromSelf ? "<-" : "->")
+    qCDebug(lcCommhistoryd) << "Handling received message: " << remoteId << (fromSelf ? "<-" : "->")
              << m_Account->objectPath() << messageText;
 
     fillEventFromMessage(message, event);
@@ -1240,7 +1240,7 @@ void TextChannelListener::handleReceivedMessage(const Tp::ReceivedMessage &messa
     event.setEndTime(receivedTime);
 
     event.setMessageToken(message.messageToken());
-    DEBUG() << "Message token is: " << message.messageToken();
+    qCDebug(lcCommhistoryd) << "Message token is: " << message.messageToken();
 
     const Tp::MessagePart &header(message.header());
     const QString subscriberId(subscriberIdentity(header));
@@ -1259,11 +1259,11 @@ void TextChannelListener::slotMessageSent(const Tp::Message &message,
         qCritical() << "Empty target id";
 
     int existingEventId = message.header().value("x-commhistory-event-id", QDBusVariant(-1)).variant().toInt();
-    DEBUG() << "Handling sent message: " << m_Account->objectPath() << "->" << remoteUid << messageText;
+    qCDebug(lcCommhistoryd) << "Handling sent message: " << m_Account->objectPath() << "->" << remoteUid << messageText;
 
     CommHistory::Event event;
     if (existingEventId >= 0 && getEventById(existingEventId, event) && event.isValid()) {
-        DEBUG() << "Sent message has an existing event" << existingEventId;
+        qCDebug(lcCommhistoryd) << "Sent message has an existing event" << existingEventId;
     } else {
         fillEventFromMessage(message, event);
         event.setIsRead(true);
@@ -1284,7 +1284,7 @@ void TextChannelListener::slotMessageSent(const Tp::Message &message,
     event.setEndTime(sentTime);
 
     event.setMessageToken(messageToken);
-    DEBUG() << "Message token is: " << messageToken;
+    qCDebug(lcCommhistoryd) << "Message token is: " << messageToken;
 
     const QVariantMap properties = m_Channel->immutableProperties();
     const QVariant &siProp = properties.value(SUBSCRIBER_ID_PROPERTY_NAME);
@@ -1321,7 +1321,7 @@ void TextChannelListener::slotMessageSent(const Tp::Message &message,
 
 void TextChannelListener::saveMessage(CommHistory::Event &event)
 {
-    DEBUG() << Q_FUNC_INFO << event.toString();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << event.toString();
 
     if (event.id() >= 0) {
         if (!eventModel().modifyEvent(event)) {
@@ -1349,7 +1349,7 @@ void TextChannelListener::expungeMessage(const QString &token)
 void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChannelProperty,
                                               bool suppressGroupChatEvents)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if (changedChannelProperty == ChannelName)
         m_GroupChatName = m_ChannelName;
@@ -1357,15 +1357,15 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
     else if (changedChannelProperty == ChannelSubject)
         m_GroupChatName = m_ChannelSubject;
 
-    DEBUG() << Q_FUNC_INFO << "New group chat name is" << m_GroupChatName;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "New group chat name is" << m_GroupChatName;
 
     if (m_Group.isValid()) {
 
-        DEBUG() << Q_FUNC_INFO << "Current group chat name for this group is" << m_Group.chatName();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Current group chat name for this group is" << m_Group.chatName();
 
         if (m_GroupChatName != m_Group.chatName()) {
 
-            DEBUG() << Q_FUNC_INFO << "updating group chat name...";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "updating group chat name...";
             m_Group.setChatName(m_GroupChatName);
 
             if (m_GroupModel) {
@@ -1378,7 +1378,7 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
                     qCritical() << "failed to modify group in database";
 
                 if (suppressGroupChatEvents) {
-                    DEBUG() << Q_FUNC_INFO << "NOT creating group chat event";
+                    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "NOT creating group chat event";
                     return;
                 }
 
@@ -1398,7 +1398,7 @@ void TextChannelListener::updateGroupChatName(ChangedChannelProperty changedChan
                         }
 
 
-                DEBUG() << Q_FUNC_INFO << "Chat room topic was changed by" << remoteId;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Chat room topic was changed by" << remoteId;
 
                 // Create a temporary CommHistory::Event for showing chat room
                 // topic change to the user in MUI conversation thread
@@ -1445,13 +1445,13 @@ void TextChannelListener::sendGroupChatEvent(const QString &message)
 
     if ( !eventModel().addEvent( event, true ) )
     {
-        DEBUG() << "*** Adding group chat event message to data model has been failed.";
+        qCDebug(lcCommhistoryd) << "*** Adding group chat event message to data model has been failed.";
      }
 }
 
 void TextChannelListener::updateCurrentGroup(int start, int end, const QModelIndex &parent)
 {
-    DEBUG() << __PRETTY_FUNCTION__ << start << end;
+    qCDebug(lcCommhistoryd) << __PRETTY_FUNCTION__ << start << end;
 
     const Recipient recipient(m_Account->objectPath(), targetId());
     int fallbackRow = -1;
@@ -1460,21 +1460,21 @@ void TextChannelListener::updateCurrentGroup(int start, int end, const QModelInd
         const QModelIndex &index = m_GroupModel->index(row, 0, parent);
         const CommHistory::Group &group = m_GroupModel->group(index);
 
-        DEBUG() << Q_FUNC_INFO << "Inserted group's account: " << group.localUid();
-        DEBUG() << Q_FUNC_INFO << "Inserted group's first target: " << group.recipients().value(0).remoteUid();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Inserted group's account: " << group.localUid();
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Inserted group's first target: " << group.recipients().value(0).remoteUid();
 
         if (group.isValid()) {
             const CommHistory::RecipientList &recipients = group.recipients();
             if (recipients.count() > 1) {
-                DEBUG() << Q_FUNC_INFO << "has multiple recipients" << recipients.count();
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "has multiple recipients" << recipients.count();
                 // This is a multi-member group; prefer to continue searching for an exact match
                 if (fallbackRow == -1 && recipients.containsMatch(recipient)) {
-                    DEBUG() << Q_FUNC_INFO << "set fallbackRow" << fallbackRow;
+                    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "set fallbackRow" << fallbackRow;
                     fallbackRow = row;
                 }
             } else if (recipients.containsMatch(recipient)) {
                 m_Group = group;
-                DEBUG() << Q_FUNC_INFO << "found existing group:" << m_Group.id();
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "found existing group:" << m_Group.id();
                 break;
             }
         }
@@ -1482,16 +1482,16 @@ void TextChannelListener::updateCurrentGroup(int start, int end, const QModelInd
     if (row == end) {
         if (fallbackRow != -1) {
             m_Group = m_GroupModel->group(m_GroupModel->index(fallbackRow, 0));
-            DEBUG() << Q_FUNC_INFO << "found existing multi-member group:" << m_Group.id();
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "found existing multi-member group:" << m_Group.id();
         } else {
-            DEBUG() << Q_FUNC_INFO << "no existing group found for targetId:" << targetId();
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "no existing group found for targetId:" << targetId();
         }
     }
 }
 
 void TextChannelListener::slotEventsCommitted(QList<CommHistory::Event> events, bool status)
 {
-    DEBUG() << Q_FUNC_INFO << status;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << status;
 
     bool removed = false;
     foreach (CommHistory::Event e, events) {
@@ -1530,7 +1530,7 @@ void TextChannelListener::slotEventsCommitted(QList<CommHistory::Event> events, 
 
 void TextChannelListener::slotSaveFailedEvents()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
     if (eventModel().addEvents(m_failedSaveEvents)) {
         foreach (CommHistory::Event e, m_failedSaveEvents)
             m_EventTokens.insertMulti(e.id(), e.messageToken());
@@ -1548,7 +1548,7 @@ void TextChannelListener::slotExpungeMessages()
             m_Connection->interface<CommHistoryTp::Client::ConnectionInterfaceStoredMessagesInterface>();
 
     if (storedMessages) {
-        DEBUG() << Q_FUNC_INFO << m_expungeTokens;
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << m_expungeTokens;
         storedMessages->ExpungeMessages(m_expungeTokens);
         m_expungeTokens.clear();
     } else {
@@ -1560,7 +1560,7 @@ void TextChannelListener::slotExpungeMessages()
 
 void TextChannelListener::slotPresenceChanged(const Tp::Presence &presence)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Tp::Contact *contact = qobject_cast<Tp::Contact *>(sender());
     if (!contact) {
@@ -1591,7 +1591,7 @@ void TextChannelListener::slotPresenceChanged(const Tp::Presence &presence)
     QString newStatusMessage = m_PresenceStatuses.value(contact->id()).second;
 
     if (!newStatusMessage.isEmpty() && groupId() != -1) {
-        DEBUG() << Q_FUNC_INFO << "Preparing status message event.";
+        qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Preparing status message event.";
         CommHistory::Event event;
         event.setType(CommHistory::Event::StatusMessageEvent);
         event.setDirection(CommHistory::Event::Inbound);
@@ -1605,18 +1605,18 @@ void TextChannelListener::slotPresenceChanged(const Tp::Presence &presence)
 
         if (!eventModel().addEvent(event, true)) {
 
-            DEBUG() << "*** Adding status message to data model has been failed.";
+            qCDebug(lcCommhistoryd) << "*** Adding status message to data model has been failed.";
         }
     }
 }
 
 void TextChannelListener::channelReady()
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     if (m_Channel && m_Connection) {
         if (m_Channel->targetHandleType() == Tp::HandleTypeRoom) {
-            DEBUG() << Q_FUNC_INFO << "group chat: HandleTypeRoom";
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "group chat: HandleTypeRoom";
             m_IsGroupChat = true;
             m_GroupHandleType = Tp::HandleTypeRoom;
         } else if (m_Channel->targetHandleType() == Tp::HandleTypeNone
@@ -1626,7 +1626,7 @@ void TextChannelListener::channelReady()
             m_GroupHandleType = Tp::HandleTypeNone;
             m_PersistentId = m_Channel->immutableProperties().value(
                 TELEPATHY_CHANNEL_INTERFACE_PERSISTENT_ID).toString();
-            DEBUG() << Q_FUNC_INFO << "group chat: HandleTypeNone, PersistentId ="
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "group chat: HandleTypeNone, PersistentId ="
                      << m_PersistentId;
 
             if (m_PersistentId.isEmpty()) {
@@ -1722,7 +1722,7 @@ void TextChannelListener::channelReady()
 
 void TextChannelListener::slotContactsReady(Tp::PendingOperation* operation)
 {
-    DEBUG() << Q_FUNC_INFO << channel();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << channel();
 
     if (operation && operation->isError()) {
         qWarning() << "No presence contacts" << operation->errorMessage();
@@ -1752,7 +1752,7 @@ void TextChannelListener::slotContactsReady(Tp::PendingOperation* operation)
 
 void TextChannelListener::slotPropertiesChanged(const Tp::PropertyValueList &props, bool listProps)
 {
-    DEBUG() << Q_FUNC_INFO << listProps;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << listProps;
     ChangedChannelProperty changedProperty = None;
 
     foreach (Tp::PropertyValue value, props) {
@@ -1760,20 +1760,20 @@ void TextChannelListener::slotPropertiesChanged(const Tp::PropertyValueList &pro
             if (value.identifier == m_Properties.value(CHANNEL_PROPERTY_NAME).propertyID) {
                 m_ChannelName = value.value.variant().toString();
                 changedProperty = ChannelName;
-                DEBUG() << Q_FUNC_INFO << "name changed:" << m_ChannelName;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "name changed:" << m_ChannelName;
             }
         }
         if (m_Properties.contains(CHANNEL_PROPERTY_SUBJECT)) {
             if (value.identifier == m_Properties.value(CHANNEL_PROPERTY_SUBJECT).propertyID) {
                 m_ChannelSubject = value.value.variant().toString();
                 changedProperty = ChannelSubject;
-                DEBUG() << Q_FUNC_INFO << "subject changed:" << m_ChannelSubject;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "subject changed:" << m_ChannelSubject;
             }
         }
         if (m_Properties.contains(CHANNEL_PROPERTY_SUBJECT_CONTACT)) {
             if (value.identifier == m_Properties.value(CHANNEL_PROPERTY_SUBJECT_CONTACT).propertyID) {
                 m_ChannelSubjectContactHandle = value.value.variant().toUInt();
-                DEBUG() << Q_FUNC_INFO << "handle of the contact who changed the subject:" << m_ChannelSubjectContactHandle;
+                qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "handle of the contact who changed the subject:" << m_ChannelSubjectContactHandle;
             }
         }
     }
@@ -1789,7 +1789,7 @@ void TextChannelListener::slotGroupMembersChanged(
         const Tp::Contacts &groupMembersRemoved,
         const Tp::Channel::GroupMemberChangeDetails &details)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
 
     Q_UNUSED(groupLocalPendingMembersAdded);
     Q_UNUSED(groupRemotePendingMembersAdded);
@@ -1809,12 +1809,12 @@ void TextChannelListener::slotGroupMembersChanged(
 
                 if (contact == m_Channel->groupSelfContact()) {
 
-                    DEBUG() << "YOU've been banned/kicked by" << details.actor()->alias();
+                    qCDebug(lcCommhistoryd) << "YOU've been banned/kicked by" << details.actor()->alias();
                     sendGroupChatEvent(txt_qtn_msg_group_chat_you_removed(details.actor()->alias()));
                 }
                 else {
 
-                    DEBUG() << contact->alias() << "has been banned/kicked by" << details.actor()->alias();
+                    qCDebug(lcCommhistoryd) << contact->alias() << "has been banned/kicked by" << details.actor()->alias();
                     sendGroupChatEvent(txt_qtn_msg_group_chat_person_removed(details.actor()->alias(), contact->alias()));
                     m_PresenceStatuses.remove(contact->id());
                 }
@@ -1823,7 +1823,7 @@ void TextChannelListener::slotGroupMembersChanged(
             // otherwise fall back to normal _leave_
             else {
 
-                DEBUG() << contact->alias() << "has left the channel";
+                qCDebug(lcCommhistoryd) << contact->alias() << "has left the channel";
                 sendGroupChatEvent(txt_qtn_msg_group_chat_remote_left(contact->alias()));
                 m_PresenceStatuses.remove(contact->id());
             }
@@ -1853,7 +1853,7 @@ void TextChannelListener::slotGroupMembersChanged(
 
 void TextChannelListener::slotJoinedGroupChat(Tp::PendingOperation *operation)
 {
-    DEBUG() << Q_FUNC_INFO << channel();
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << channel();
 
     if (operation && operation->isError()) {
         qWarning() << "No contacts" << operation->errorMessage();
@@ -1867,7 +1867,7 @@ void TextChannelListener::slotJoinedGroupChat(Tp::PendingOperation *operation)
             // Ignore self contact. In that case "You have joined..." message
             // should be shown instead (by messaging-ui)
             if (contacts.value(i) != m_Channel->groupSelfContact()) {
-                DEBUG() << contacts.value(i)->alias() << "joined";
+                qCDebug(lcCommhistoryd) << contacts.value(i)->alias() << "joined";
                 sendGroupChatEvent(txt_qtn_msg_group_chat_remote_joined(contacts.value(i)->alias()));
             }
         }
@@ -1885,7 +1885,7 @@ void TextChannelListener::slotHandleOwnersFetched(Tp::PendingOperation *op)
                 i.next();
                 if (i.value() == handleOwner->handle().first()) {
                     m_HandleOwnerNames.insert(i.key(), handleOwner->id());
-                    DEBUG() << Q_FUNC_INFO << "added handle owner:"
+                    qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "added handle owner:"
                              << i.key() << handleOwner->id();
                     break;
                 }
@@ -1937,7 +1937,7 @@ void TextChannelListener::closed()
 void TextChannelListener::finishedWithError(const QString& errorName,
                                             const QString& errorMessage)
 {
-    DEBUG() << Q_FUNC_INFO;
+    qCDebug(lcCommhistoryd) << Q_FUNC_INFO;
     if (!m_InvocationContext.isNull())
         m_InvocationContext->setFinishedWithError(errorName, errorMessage);
 

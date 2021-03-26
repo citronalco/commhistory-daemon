@@ -69,7 +69,7 @@ AccountPresenceService::AccountPresenceService(Tp::AccountManagerPtr manager, QO
 
     if (!m_accountManager->isReady()) {
         // Wait for the account manager to become ready
-        DEBUG() << "Waiting for account manager to become ready";
+        qCDebug(lcCommhistoryd) << "Waiting for account manager to become ready";
         Tp::PendingReady *pr = m_accountManager->becomeReady(Tp::AccountManager::FeatureCore);
         Q_ASSERT(pr);
         connect(pr, SIGNAL(finished(Tp::PendingOperation *)),
@@ -138,7 +138,7 @@ void AccountPresenceService::setAccountPresenceWithMessage(const QString &accoun
 void AccountPresenceService::accountManagerReady(Tp::PendingOperation *)
 {
     if (m_accountManager->isReady()) {
-        DEBUG() << "Account manager is now ready";
+        qCDebug(lcCommhistoryd) << "Account manager is now ready";
 
         // Process any updates that were previously deferred
         if (m_globalUpdatePresent) {

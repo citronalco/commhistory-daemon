@@ -30,6 +30,8 @@ TEMPLATE     = app
 INCLUDEPATH += . .. \
                ../../src
 
+TEST_SOURCES += $$PWD/testdebug.cpp
+
 PKGCONFIG += mlite5 commhistory-qt5 nemonotifications-qt5 qofono-qt5 \
              contactcache-qt5 qtcontacts-sqlite-qt5-extensions
 
