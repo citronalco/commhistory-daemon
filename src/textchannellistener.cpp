@@ -1832,7 +1832,7 @@ void TextChannelListener::slotPropertiesChanged(const Tp::PropertyValueList &pro
 }
 void TextChannelListener::slotRequestAllRoomProperies(Tp::PendingOperation *operation)
 {
-    DEBUG() << __FUNCTION__;
+    qCDebug(lcCommhistoryd) << __FUNCTION__;
 
     QVariantMap properties = dynamic_cast<Tp::PendingVariantMap*>( operation )->result();
     processRoomProperties(properties);
@@ -1840,7 +1840,7 @@ void TextChannelListener::slotRequestAllRoomProperies(Tp::PendingOperation *oper
 
 void TextChannelListener::slotRequestPropertyRoomName(Tp::PendingOperation *operation)
 {
-    DEBUG() << __FUNCTION__;
+    qCDebug(lcCommhistoryd) << __FUNCTION__;
 
     QString name = dynamic_cast<Tp::PendingVariant*>( operation )->result().toString();
 
@@ -1856,7 +1856,7 @@ void TextChannelListener::slotRequestPropertyRoomName(Tp::PendingOperation *oper
 
 void TextChannelListener::slotRoomPropertiesChanged(const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
 {
-    DEBUG() << __FUNCTION__;
+    qCDebug(lcCommhistoryd) << __FUNCTION__;
     processRoomProperties(changedProperties);
 }
 
