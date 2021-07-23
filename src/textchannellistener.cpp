@@ -1524,7 +1524,7 @@ void TextChannelListener::updateCurrentGroup(int start, int end, const QModelInd
             } else if (recipients.containsMatch(recipient)) {
                 m_Group = group;
                 qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "found existing group:" << m_Group.id();
-                break;
+                return;
             }
         }
     }
