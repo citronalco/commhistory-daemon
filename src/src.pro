@@ -69,7 +69,6 @@ HEADERS += logger.h \
            accountoperationsobserver.h \
            accountpresenceifadaptor.h \
            accountpresenceservice.h \
-           lastdialedcache.h \
            debug.h \
            fscleanup.h \
            mmshandler.h \
@@ -95,7 +94,6 @@ SOURCES += main.cpp \
            accountoperationsobserver.cpp \
            accountpresenceifadaptor.cpp \
            accountpresenceservice.cpp \
-           lastdialedcache.cpp \
            fscleanup.cpp \
            mmshandler.cpp \
            mmspart.cpp \
