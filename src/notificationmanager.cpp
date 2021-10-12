@@ -89,6 +89,7 @@ void NotificationManager::addModem(QString path)
 
     connect(mw, SIGNAL(voicemailWaitingChanged(bool)), SLOT(slotVoicemailWaitingChanged()));
     connect(mw, SIGNAL(voicemailMessageCountChanged(int)), SLOT(slotVoicemailWaitingChanged()));
+    connect(mw, SIGNAL(voicemailMailboxNumberChanged(const QString&)), SLOT(slotVoicemailWaitingChanged()));
     connect(mw, SIGNAL(validChanged(bool)), this, SLOT(slotValidChanged(bool)));
 
     if (mw->isValid()) {
