@@ -1,6 +1,6 @@
 Name:       commhistory-daemon
 Summary:    Communications event history database daemon
-Version:    0.8
+Version:    0.8.41
 Release:    1
 License:    LGPLv2
 URL:        https://git.sailfishos.org/mer-core/commhistory-daemon
