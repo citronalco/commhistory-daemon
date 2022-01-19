@@ -36,28 +36,70 @@ using namespace CommHistory;
 // events
 struct EventTypes {
     int type;
-    const char* event;
+    QLatin1String event;
+    QLatin1String icon;
+
+    bool both;
 };
 
 static const EventTypes _eventTypes[] =
 {
-    {CommHistory::Event::IMEvent,       "x-nemo.messaging.im"},
-    {CommHistory::Event::SMSEvent,      "x-nemo.messaging.sms"},
-    {CommHistory::Event::MMSEvent,      "x-nemo.messaging.mms"},
-    {CommHistory::Event::CallEvent,     "x-nemo.call.missed"},
-    {CommHistory::Event::VoicemailEvent,"x-nemo.messaging.voicemail"},
-    {VOICEMAIL_SMS_EVENT_TYPE,          "x-nemo.messaging.voicemail-SMS"}
+    {
+        CommHistory::Event::IMEvent,
+        QLatin1String("chat"),
+        QLatin1String("icon-lock-sms"),
+        true
+    },
+    {
+        CommHistory::Event::SMSEvent,
+        QLatin1String("sms"),
+        QLatin1String("icon-lock-sms"),
+        true
+    },
+    {
+        CommHistory::Event::MMSEvent,
+        QLatin1String("sms"),
+        QLatin1String("icon-lock-sms"),
+        true
+    },
+    {
+        CommHistory::Event::CallEvent,
+        QLatin1String("call"),
+        QLatin1String("icon-lock-missed-call"),
+        false
+    },
+    {
+        CommHistory::Event::VoicemailEvent,
+        QLatin1String("sms"),
+        QLatin1String("icon-lock-voicemail"),
+        true
+    },
+    {
+        VOICEMAIL_SMS_EVENT_TYPE,
+        QLatin1String("sms"),
+        QLatin1String("icon-lock-sms"),
+        true
+    }
 };
 
 static const int _eventTypesCount = sizeof(_eventTypes) / sizeof(EventTypes);
 
-static QString groupType(int eventType)
+static void applyTypes(Notification *notification, int eventType, bool restore)
 {
     for (int i = 0; i < _eventTypesCount; i++) {
-        if (_eventTypes[i].type == eventType)
-            return QLatin1String(_eventTypes[i].event);
+        if (_eventTypes[i].type == eventType) {
+            QString feedbackType;
+            if (!_eventTypes[i].both || restore) {
+                feedbackType = QStringLiteral("%1_exists").arg(_eventTypes[i].event);
+            } else {
+                feedbackType = QStringLiteral("%1,%1_exists").arg(_eventTypes[i].event);
+            }
+            notification->setHintValue("x-nemo-feedback", feedbackType);
+            notification->setAppIcon(_eventTypes[i].icon);
+
+            return;
+        }
     }
-    return QString();
 }
 
 static QString groupName(PersonalNotification::EventCollection collection)
@@ -148,6 +190,7 @@ QByteArray PersonalNotification::serialized() const
 void PersonalNotification::publishNotification()
 {
     QString name;
+    bool restoring = true;
 
     // voicemail notifications shouldn't have contact name
     if (m_eventType != CommHistory::Event::VoicemailEvent)
@@ -158,14 +201,18 @@ void PersonalNotification::publishNotification()
         connect(m_notification, SIGNAL(closed(uint)), SLOT(onClosed(uint)));
 
         m_notification->setTimestamp(QDateTime::currentDateTimeUtc());
+        restoring = false;
     }
 
+    applyTypes(m_notification, m_eventType, restoring);
+
     m_notification->setAppName(groupName(collection()));
-    m_notification->setCategory(groupType(m_eventType));
     m_notification->setHintValue("x-commhistoryd-data", serialized().toBase64());
     m_notification->setSummary(name);
     m_notification->setBody(notificationText());
     m_notification->setIcon(m_recipient.contactAvatarUrl().toString());
+    m_notification->setHintValue("x-nemo-display-on", true);
+    m_notification->setHintValue("x-nemo-priority", 120);
 
     NotificationManager::instance()->setNotificationProperties(m_notification, this, false);
 
