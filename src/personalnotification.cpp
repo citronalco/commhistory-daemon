@@ -119,28 +119,29 @@ static QString groupName(PersonalNotification::EventCollection collection)
 }
 
 
-PersonalNotification::PersonalNotification(QObject* parent) : QObject(parent),
-    m_eventType(CommHistory::Event::UnknownType),
-    m_chatType(CommHistory::Group::ChatTypeP2P),
-    m_hasPendingEvents(false),
-    m_notification(0)
+PersonalNotification::PersonalNotification(QObject* parent)
+    : QObject(parent)
+    , m_eventType(CommHistory::Event::UnknownType)
+    , m_chatType(CommHistory::Group::ChatTypeP2P)
+    , m_hasPendingEvents(false)
+    , m_notification(0)
 {
 }
 
-PersonalNotification::PersonalNotification(const QString& remoteUid,
-                                           const QString& account,
+PersonalNotification::PersonalNotification(const QString &remoteUid,
+                                           const QString &account,
                                            CommHistory::Event::EventType eventType,
-                                           const QString& channelTargetId,
+                                           const QString &channelTargetId,
                                            CommHistory::Group::ChatType chatType,
                                            uint contactId,
-                                           const QString& lastNotification,
-                                          QObject* parent) :
-    QObject(parent), m_remoteUid(remoteUid), m_account(account),
-    m_eventType(eventType), m_targetId(channelTargetId), m_chatType(chatType),
-    m_notificationText(lastNotification),
-    m_hasPendingEvents(true),
-    m_notification(0),
-    m_recipient(account, remoteUid)
+                                           const QString &lastNotification,
+                                           QObject *parent)
+    : QObject(parent), m_remoteUid(remoteUid), m_account(account)
+    , m_eventType(eventType), m_targetId(channelTargetId), m_chatType(chatType)
+    , m_notificationText(lastNotification)
+    , m_hasPendingEvents(true)
+    , m_notification(0)
+    , m_recipient(account, remoteUid)
 {
 }
 
@@ -251,8 +252,9 @@ QString PersonalNotification::notificationName() const
     } else if (CommHistory::localUidComparesPhoneNumbers(account())) {
         ML10N::MLocale locale;
         return locale.toLocalizedNumbers(remoteUid());
-    } else
+    } else {
         return remoteUid();
+    }
 }
 
 PersonalNotification::EventCollection PersonalNotification::collection() const
@@ -303,7 +305,6 @@ uint PersonalNotification::contactId() const
 {
     return m_recipient.contactId();
 }
-
 
 QString PersonalNotification::notificationText() const
 {
