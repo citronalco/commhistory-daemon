@@ -39,6 +39,7 @@
 #define MESSAGING_INTERFACE       QLatin1String("org.sailfishos.Messages")
 #define SHOW_INBOX_METHOD         QLatin1String("showGroupsWindow")
 #define START_CONVERSATION_METHOD QLatin1String("startConversation")
+#define SEND_MESSAGE_METHOD       QLatin1String("sendMessage")
 
 #define CALL_HISTORY_SERVICE_NAME QLatin1String("com.nokia.telephony.callhistory")
 #define CALL_HISTORY_OBJECT_PATH  QLatin1String("/org/maemo/m")

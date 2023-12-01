@@ -646,15 +646,17 @@ void NotificationManager::setNotificationProperties(Notification *notification, 
 
                 if (pn->eventType() == CommHistory::Event::IMEvent || pn->hasPhoneNumber()) {
                     // Named action: "Reply"
-                    remoteActions.append(dbusAction(QString(),
-                                                    txt_qtn_msg_notification_reply,
-                                                    MESSAGING_SERVICE_NAME,
-                                                    OBJECT_PATH,
-                                                    MESSAGING_INTERFACE,
-                                                    START_CONVERSATION_METHOD,
-                                                    QVariantList() << pn->account()
-                                                                   << pn->targetId()
-                                                                   << true));
+                    QVariantMap action
+                            = dbusAction(QString(),
+                                         txt_qtn_msg_notification_reply,
+                                         MESSAGING_SERVICE_NAME,
+                                         OBJECT_PATH,
+                                         MESSAGING_INTERFACE,
+                                         SEND_MESSAGE_METHOD,
+                                         QVariantList() << pn->account() << pn->targetId())
+                            .toMap();
+                    action.insert(QLatin1String("type"), QLatin1String("input"));
+                    remoteActions.append(action);
                 }
             }
 
