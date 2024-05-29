@@ -29,8 +29,8 @@
 #include <CommHistory/mmsreadreportmodel.h>
 #include <CommHistory/commonutils.h>
 #include <CommHistory/groupmanager.h>
-#include <CommHistory/constants.h>
 #include <CommHistory/mmsconstants.h>
+#include <CommHistory/updateslistener.h>
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -90,7 +90,6 @@ MmsHandler::MmsHandler(QObject* parent)
     qDBusRegisterMetaType<MmsPartFd>();
     qDBusRegisterMetaType<MmsPartList>();
     qDBusRegisterMetaType<MmsPartFdList>();
-    qDBusRegisterMetaType<QList<CommHistory::Event> >();
 
     QOfonoManager* ofonoManager = m_ofonoManager.data();
     connect(ofonoManager, SIGNAL(modemAdded(QString)), SLOT(onModemAdded(QString)));
@@ -101,15 +100,11 @@ MmsHandler::MmsHandler(QObject* parent)
 
     connect(ofonoManager, SIGNAL(availableChanged(bool)), SLOT(onOfonoAvailableChanged(bool)));
 
-    QDBusConnection dbus(QDBusConnection::sessionBus());
-    if (!dbus.connect(QString(), COMM_HISTORY_OBJECT_PATH, COMM_HISTORY_INTERFACE,
-        EVENTS_UPDATED_SIGNAL, this, SLOT(onEventsUpdated(QList<CommHistory::Event>)))) {
-        qWarning() << "MmsHandler: failed to register" << EVENTS_UPDATED_SIGNAL << "handler";
-    }
-    if (!dbus.connect(QString(), COMM_HISTORY_OBJECT_PATH, COMM_HISTORY_INTERFACE,
-        GROUPS_UPDATED_FULL_SIGNAL, this, SLOT(onGroupsUpdatedFull(QList<CommHistory::Group>)))) {
-        qWarning() << "MmsHandler: failed to register" << GROUPS_UPDATED_FULL_SIGNAL << "handler";
-    }
+    CommHistory::UpdatesListener *listener = new CommHistory::UpdatesListener(this);
+    connect(listener, &CommHistory::UpdatesListener::eventsUpdated,
+            this, &MmsHandler::onEventsUpdated);
+    connect(listener, &CommHistory::UpdatesListener::groupsUpdatedFull,
+            this, &MmsHandler::onGroupsUpdatedFull);
 }
 
 QDBusPendingCall MmsHandler::callEngine(const QString &method, const QVariantList &args)
