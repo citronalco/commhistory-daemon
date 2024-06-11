@@ -25,7 +25,7 @@
 
 #include <CommHistory/commhistorydatabasepath.h>
 #include <CommHistory/databaseio.h>
-#include <CommHistory/constants.h>
+#include <CommHistory/updateslistener.h>
 
 #include <QDirIterator>
 #include <QDBusConnection>
@@ -36,11 +36,11 @@ Q_LOGGING_CATEGORY(lcFsCleanup, "commhistoryd.fscleanup", QtWarningMsg)
 FsCleanup::FsCleanup(QObject* aParent) :
     QObject(aParent)
 {
-    QDBusConnection dbus(QDBusConnection::sessionBus());
-    dbus.connect(QString(), QString(), COMM_HISTORY_INTERFACE,
-        EVENT_DELETED_SIGNAL, this, SLOT(onEventDeleted(int)));
-    dbus.connect(QString(), QString(), COMM_HISTORY_INTERFACE,
-        GROUPS_DELETED_SIGNAL, this, SLOT(onGroupsDeleted(QList<int>)));
+    CommHistory::UpdatesListener *updatesListener = new CommHistory::UpdatesListener(this);
+    connect(updatesListener, &CommHistory::UpdatesListener::eventDeleted,
+            this, &FsCleanup::onEventDeleted);
+    connect(updatesListener, &CommHistory::UpdatesListener::groupsDeleted,
+            this, &FsCleanup::onGroupsDeleted);
     fullCleanup();
 }
 
