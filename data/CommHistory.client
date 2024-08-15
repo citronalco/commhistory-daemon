@@ -15,11 +15,3 @@ org.freedesktop.Telepathy.Channel.TargetHandleType u=1
 [org.freedesktop.Telepathy.Client.Observer.ObserverChannelFilter 2]
 org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.Text
 org.freedesktop.Telepathy.Channel.TargetHandleType u=2
-
-[org.freedesktop.Telepathy.Client.Observer.ObserverChannelFilter 3]
-org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.StreamedMedia
-org.freedesktop.Telepathy.Channel.TargetHandleType u=1
-
-[org.freedesktop.Telepathy.Client.Observer.ObserverChannelFilter 4]
-org.freedesktop.Telepathy.Channel.ChannelType s=org.freedesktop.Telepathy.Channel.Type.StreamedMedia
-org.freedesktop.Telepathy.Channel.TargetHandleType u=2

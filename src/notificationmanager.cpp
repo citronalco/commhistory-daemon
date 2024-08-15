@@ -29,8 +29,6 @@
 
 // CommHistory includes
 #include <CommHistory/commonutils.h>
-#include <CommHistory/GroupModel>
-#include <CommHistory/Group>
 
 // Telepathy includes
 #include <TelepathyQt/Constants>
@@ -113,6 +111,10 @@ void NotificationManager::init()
             SLOT(slotContactChanged(RecipientList)));
     connect(m_contactListener.data(), SIGNAL(contactInfoChanged(RecipientList)),
             SLOT(slotContactInfoChanged(RecipientList)));
+
+    m_eventListener = new UpdatesListener(this);
+    connect(m_eventListener, &UpdatesListener::eventsUpdated,
+            this, &NotificationManager::slotEventUpdated);
 
     m_ngfClient = new Ngf::Client(this);
     connect(m_ngfClient, SIGNAL(eventFailed(quint32)), SLOT(slotNgfEventFinished(quint32)));
@@ -968,5 +970,15 @@ void NotificationManager::slotValidChanged(bool valid)
     QOfonoMessageWaiting *mw = (QOfonoMessageWaiting*)sender();
     if (mw->isValid()) {
         slotVoicemailWaitingChanged();
+    }
+}
+
+void NotificationManager::slotEventUpdated(const QList<Event> &events)
+{
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotEventAdded nember of new events: " << events.count();
+    for (const Event event : events) {
+        if (event.isMissedCall()) {
+            showNotification(event);
+        }
     }
 }

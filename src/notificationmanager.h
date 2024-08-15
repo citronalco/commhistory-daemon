@@ -43,6 +43,7 @@
 #include <CommHistory/ContactListener>
 #include <CommHistory/ContactResolver>
 #include <CommHistory/Recipient>
+#include <CommHistory/updateslistener.h>
 
 // our includes
 #include "commhistoryservice.h"
@@ -142,6 +143,7 @@ private Q_SLOTS:
     void slotModemRemoved(QString path);
     void slotModemsChanged(QStringList modems);
     void slotValidChanged(bool valid);
+    void slotEventUpdated(const QList<CommHistory::Event> &events);
 
 private:
     NotificationManager( QObject* parent = 0);
@@ -176,6 +178,8 @@ private:
 
     Ngf::Client *m_ngfClient;
     quint32 m_ngfEvent;
+
+    CommHistory::UpdatesListener *m_eventListener;
 
     QSharedPointer<QOfonoManager> ofonoManager;
     QHash<QString,QOfonoMessageWaiting*> interfaces;

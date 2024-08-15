@@ -28,7 +28,6 @@
 
 #include <TelepathyQt/PendingReady>
 #include <TelepathyQt/TextChannel>
-#include <TelepathyQt/StreamedMediaChannel>
 #include <TelepathyQt/Channel>
 #include <TelepathyQt/ContactManager>
 #include <TelepathyQt/PendingContacts>
