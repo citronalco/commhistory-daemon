@@ -44,8 +44,6 @@
 **
 ******************************************************************************/
 
-#include <MLocale>
-
 //% "Messages"
 #define txt_qtn_msg_notifications_group qtTrId("qtn_msg_notifications_group")
 //% "Warnings"
@@ -55,8 +53,6 @@
 //% "Voicemail"
 #define txt_qtn_msg_voicemail_group qtTrId("qtn_msg_voicemail_group")
 
-//% "%n new message(s)"
-#define txt_qtn_msg_notification_new_message(NUM) qtTrId("qtn_msg_notification_new_message", NUM)
 //% "Contact card"
 #define txt_qtn_msg_contact_card_label qtTrId("qtn_msg_contact_card_label")
 //% "%1 | %2"
@@ -77,8 +73,6 @@
 #define txt_qtn_call_voicemail_notification(NUM) qtTrId("qtn_call_voicemail_notification", NUM)
 //% "Private number"
 #define txt_qtn_call_type_private qtTrId("qtn_call_type_private")
-//% "Voicemail"
-#define txt_qtn_call_type_voicemail qtTrId("qtn_call_type_voicemail")
 //% "Call back"
 #define txt_qtn_call_notification_call_back qtTrId("txt_qtn_call_notification_call_back")
 //% "Send message"
@@ -86,15 +80,7 @@
 
 //% "Tap to listen"
 #define txt_qtn_voicemail_prompt qtTrId("qtn_voicemail_prompt")
-//% "Call voicemail"
-#define txt_qtn_voicemail_notification_call qtTrId("txt_qtn_voicemail_notification_call")
 
-//% "Multimedia message was delivered to %1"
-#define txt_qtn_msg_notification_delivered(STR) qtTrId("qtn_mms_info_delivered").arg(STR)
-//% "Multimedia message was read by %1"
-#define txt_qtn_msg_notification_read(STR) qtTrId("qtn_mms_info_msg_read").arg(STR)
-//% "Multimedia message was deleted without reading by %1"
-#define txt_qtn_msg_notification_deleted(STR) qtTrId("qtn_mms_info_delete_wo_reading").arg(STR)
 //% "MMS is ready to download"
 #define txt_qtn_mms_notification_manual_download qtTrId("qtn_mms_notification_manual_download")
 //% "MMS sending failed"
