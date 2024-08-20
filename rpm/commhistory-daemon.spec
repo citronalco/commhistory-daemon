@@ -58,10 +58,9 @@ Daemon for logging communications (IM, SMS and call) in history database.
 %build
 unset LD_AS_NEEDED
 %qmake5
-make %{?_smp_mflags}
+%make_build
 
 %install
-rm -rf %{buildroot}
 %qmake5_install
 
 mkdir -p %{buildroot}%{_userunitdir}/user-session.target.wants
@@ -71,7 +70,6 @@ mkdir -p %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 
 %files
-%defattr(-,root,root,-)
 %license LICENSE
 %{_bindir}/commhistoryd
 %{_userunitdir}/commhistoryd.service
@@ -83,10 +81,8 @@ install -m 644 -p %{SOURCE1} %{buildroot}%{_datadir}/mapplauncherd/privileges.d
 %{_datadir}/mapplauncherd/privileges.d/*
 
 %files tests
-%defattr(-,root,root,-)
 /opt/tests/%{name}
 
 %files ts-devel
-%defattr(-,root,root,-)
 %{_datadir}/translations/source/*.ts
 
