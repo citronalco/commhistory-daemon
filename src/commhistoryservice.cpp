@@ -65,17 +65,6 @@ CommHistoryService::~CommHistoryService()
     QDBusConnection::sessionBus().unregisterService(COMM_HISTORY_DAEMON_SERVICE_NAME);
 }
 
-void CommHistoryService::activateAuthorization(const QString& contactId,
-                                               const QString& accountPath,
-                                               const QString& filename,
-                                               const QString& message,
-                                               const QString& transactionId,
-                                               const QString& accountUniqueIdentifier)
-{
-    Q_EMIT showAuthorizationDialog(contactId, accountPath, filename, message,
-                                  transactionId, accountUniqueIdentifier);
-}
-
 void CommHistoryService::setCallHistoryObserved(bool observed)
 {
     if (observed != m_callHistoryObserved) {

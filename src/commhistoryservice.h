@@ -48,11 +48,6 @@ public:
     const QList<Conversation> &observedConversations() const { return m_observedConversations; }
 
 public Q_SLOTS:
-    /*! \brief emits signal that authorisation dialog should be shown for contact */
-    void activateAuthorization(const QString& contactId, const QString& accountPath,
-                               const QString& filename, const QString& message,
-                               const QString& transactionId,
-                               const QString& accountUniqueIdentifier);
     void setCallHistoryObserved(bool observed);
     void setInboxObserved(bool observed, const QString &filterAccount = QString());
     void setObservedConversations(const QVariantList &conversations);
