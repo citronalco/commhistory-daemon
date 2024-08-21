@@ -24,7 +24,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-// Used to generate duiremoteaction strings
+// Used to generate remoteaction strings
 #define OBJECT_PATH QLatin1String("/")
 
 #define COMM_HISTORY_DAEMON_SERVICE_NAME QLatin1String("org.nemomobile.CommHistory")
@@ -63,32 +63,7 @@
 
 #define RING_ACCOUNT_PATH_PREFIX QLatin1String("/org/freedesktop/Telepathy/Account/ring/tel")
 
-#define CONTACT_SEPARATOR_IN_NOTIFICATION_GROUP QLatin1String(", ")
-
-// notification threshold is 3 seconds
-#define NOTIFICATION_THRESHOLD 3000
-// threshold to trigger contact request after added/modified contacts signals
-#define CONTACT_REQUEST_THRESHOLD 5000
-// give up on contact fetch request
-#define CONTACT_REQUEST_TIMEROUT 3000
-/* Clean up check -period for old calls as DAYS.
-   Note: this cannot be > 24 days, because then the int value given for QTimer::setInterval(int)
-   will go out of int range. */
-#define CLEANUP_PERIOD_DAYS 7
-// First clean up after boot in ms.
-#define BOOT_CLEANUP_MS 3600000
-// This amount of days is counted back to determine how old calls should be deleted.
-#define REMOVAL_TARGET_DAYS -90
-
-// Voice mail contact's GUID, used by MeeGo Harmattan Contacts application.
-#define VOICEMAIL_CONTACT_GUID QLatin1String("9aeeea49-fab9-4d4e-b0cc-497f2aeac9a8")
-
 // This event type is used only locally (in NotificationManager) and is not defined in CommHistory::Event::EvenType enum.
 #define VOICEMAIL_SMS_EVENT_TYPE 100
-
-// Path and name of the vmid file used to contain local id of of a voice mail contact when such a contact is added.
-#define VOICEMAIL_CONTACT_VMID_MAIN QLatin1String("/dev/shm")
-#define VOICEMAIL_CONTACT_VMID_DIR  QLatin1String("contacts")
-#define VOICEMAIL_CONTACT_VMID_FILE QLatin1String("vmid")
 
 #endif //#define CONSTANTS_H
