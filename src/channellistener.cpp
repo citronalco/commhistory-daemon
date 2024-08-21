@@ -159,10 +159,8 @@ QString ChannelListener::targetId() const
 
     QVariantMap properties = m_Channel->immutableProperties();
 
-    if (properties.contains(TELEPATHY_CHANNEL_INTERFACE_PERSISTENT_ID)) {
-        targetId = properties.value(TELEPATHY_CHANNEL_INTERFACE_PERSISTENT_ID).toString();
-    } else if (properties.contains(TP_QT_IFACE_CHANNEL+QLatin1String(".TargetID"))) {
-        targetId = properties.value(TP_QT_IFACE_CHANNEL+QLatin1String(".TargetID")).toString();
+    if (properties.contains(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetID"))) {
+        targetId = properties.value(TP_QT_IFACE_CHANNEL + QLatin1String(".TargetID")).toString();
     }
 
     return targetId;

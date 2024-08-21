@@ -1673,15 +1673,6 @@ void TextChannelListener::channelReady()
                        TP_QT_IFACE_CHANNEL_INTERFACE_GROUP)) {
             m_IsGroupChat = true;
             m_GroupHandleType = Tp::HandleTypeNone;
-            m_PersistentId = m_Channel->immutableProperties().value(
-                TELEPATHY_CHANNEL_INTERFACE_PERSISTENT_ID).toString();
-            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "group chat: HandleTypeNone, PersistentId ="
-                     << m_PersistentId;
-
-            if (m_PersistentId.isEmpty()) {
-                qCritical() << Q_FUNC_INFO << "No persistent id for Tp::HandleTypeNone groupchat";
-                return;
-            }
         }
 
         if (m_Channel->interfaces().contains(TP_QT_IFACE_CHANNEL_INTERFACE_GROUP))

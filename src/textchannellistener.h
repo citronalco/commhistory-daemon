@@ -213,7 +213,6 @@ private:
     QString m_ChannelName;
     QString m_ChannelSubject;
     uint m_ChannelSubjectContactHandle;
-    QString m_PersistentId;
 
     // internal copy of message queue
     QList<Tp::ReceivedMessage> m_messageQueue;

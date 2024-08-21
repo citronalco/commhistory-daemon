@@ -65,8 +65,6 @@
 
 #define CONTACT_SEPARATOR_IN_NOTIFICATION_GROUP QLatin1String(", ")
 
-#define TELEPATHY_CHANNEL_INTERFACE_PERSISTENT_ID QLatin1String("com.nokia.Telepathy.Channel.Interface.Persistent.PersistentID")
-
 // notification threshold is 3 seconds
 #define NOTIFICATION_THRESHOLD 3000
 // threshold to trigger contact request after added/modified contacts signals
