@@ -36,7 +36,6 @@
 #include "accountpresenceservice.h"
 #include "accountpresenceifadaptor.h"
 #include "messagereviver.h"
-#include "contactauthorizationlistener.h"
 #include "connectionutils.h"
 #include "accountoperationsobserver.h"
 #include "fscleanup.h"
@@ -126,9 +125,6 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     qCDebug(lcCommhistoryd) << "CommHistoryService created";
 
     ConnectionUtils *utils = new ConnectionUtils(&app);
-
-    // ContactAuthorizationListener needs to be updated with nemo-notifications and new UI handling
-    //new ContactAuthorizationListener(utils, chService);
 
     AccountPresenceService *apService = new AccountPresenceService(utils->accountManager(), &app);
     if (!apService->isRegistered()) {

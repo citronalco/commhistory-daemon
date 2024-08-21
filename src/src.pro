@@ -63,8 +63,6 @@ HEADERS += logger.h \
            locstrings.h \
            messagereviver.h \
            connectionutils.h \
-           contactauthorizationlistener.h \
-           contactauthorizer.h \
            constants.h \
            accountoperationsobserver.h \
            accountpresenceifadaptor.h \
@@ -89,8 +87,6 @@ SOURCES += main.cpp \
            commhistoryservice.cpp \
            messagereviver.cpp \
            connectionutils.cpp \
-           contactauthorizationlistener.cpp \
-           contactauthorizer.cpp \
            accountoperationsobserver.cpp \
            accountpresenceifadaptor.cpp \
            accountpresenceservice.cpp \

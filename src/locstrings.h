@@ -123,11 +123,6 @@
 //% "All participants are offline."
 #define txt_qtn_msg_all_participants_offline qtTrId("qtn_msg_all_participants_offline")
 
-//% "Authorization request %1"
-#define txt_qtn_pers_authorization_req qtTrId("qtn_pers_authorization_req")
-//% "You need to be online to perform this operation"
-#define txt_qtn_pers_offline qtTrId("qtn_pers_offline")
-
 //% "Group chat"
 #define txt_qtn_msg_group_chat qtTrId("qtn_msg_group_chat")
 
