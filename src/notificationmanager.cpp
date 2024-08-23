@@ -976,7 +976,7 @@ void NotificationManager::slotValidChanged(bool valid)
 void NotificationManager::slotEventUpdated(const QList<Event> &events)
 {
     qCDebug(lcCommhistoryd) << "NotificationManager::slotEventAdded nember of new events: " << events.count();
-    for (const Event event : events) {
+    for (const Event &event : events) {
         if (event.isMissedCall()) {
             showNotification(event);
         }
