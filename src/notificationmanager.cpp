@@ -113,8 +113,8 @@ void NotificationManager::init()
             SLOT(slotContactInfoChanged(RecipientList)));
 
     m_eventListener = new UpdatesListener(this);
-    connect(m_eventListener, &UpdatesListener::eventsUpdated,
-            this, &NotificationManager::slotEventUpdated);
+    connect(m_eventListener, &UpdatesListener::eventsAdded,
+            this, &NotificationManager::slotEventsAdded);
 
     m_ngfClient = new Ngf::Client(this);
     connect(m_ngfClient, SIGNAL(eventFailed(quint32)), SLOT(slotNgfEventFinished(quint32)));
@@ -973,11 +973,11 @@ void NotificationManager::slotValidChanged(bool valid)
     }
 }
 
-void NotificationManager::slotEventUpdated(const QList<Event> &events)
+void NotificationManager::slotEventsAdded(const QList<Event> &events)
 {
-    qCDebug(lcCommhistoryd) << "NotificationManager::slotEventAdded nember of new events: " << events.count();
+    qCDebug(lcCommhistoryd) << "NotificationManager::slotEventsAdded received new events: " << events.count();
     for (const Event &event : events) {
-        if (event.isMissedCall()) {
+        if (event.incomingStatus() == CommHistory::Event::NotAnswered) {
             showNotification(event);
         }
     }

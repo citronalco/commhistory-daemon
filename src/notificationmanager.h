@@ -143,7 +143,7 @@ private Q_SLOTS:
     void slotModemRemoved(QString path);
     void slotModemsChanged(QStringList modems);
     void slotValidChanged(bool valid);
-    void slotEventUpdated(const QList<CommHistory::Event> &events);
+    void slotEventsAdded(const QList<CommHistory::Event> &events);
 
 private:
     NotificationManager( QObject* parent = 0);
