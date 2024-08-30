@@ -38,8 +38,8 @@ using namespace CommHistory;
 #define MAX_RETRIES 10
 
 MessageReviver::MessageReviver(ConnectionUtils *connectionUtils,
-                               QObject *parent) :
-    QObject(parent)
+                               QObject *parent)
+    : QObject(parent)
 {
     connect(connectionUtils,
             SIGNAL(connectionReady(Tp::ConnectionPtr)),

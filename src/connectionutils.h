@@ -47,20 +47,20 @@ Q_SIGNALS:
     void connectionReady(const Tp::ConnectionPtr& connection);
 
 private Q_SLOTS:
-        void slotAccountManagerReady(Tp::PendingOperation *);
-        void slotAccountReady(Tp::PendingOperation *);
-        void slotAddAccount(const Tp::AccountPtr &account);
-        void slotAccountValidityChanged(bool valid);
-        void slotConnectionChanged(const Tp::ConnectionPtr &connection);
-        void slotConnectionReady(Tp::PendingOperation* operation);
+    void slotAccountManagerReady(Tp::PendingOperation *);
+    void slotAccountReady(Tp::PendingOperation *);
+    void slotAddAccount(const Tp::AccountPtr &account);
+    void slotAccountValidityChanged(bool valid);
+    void slotConnectionChanged(const Tp::ConnectionPtr &connection);
+    void slotConnectionReady(Tp::PendingOperation* operation);
 
 private:
-        void prepareAccounts();
-        void prepareAccount(const Tp::AccountPtr &account);
-        void prepareConnection(const Tp::AccountPtr &account);
+    void prepareAccounts();
+    void prepareAccount(const Tp::AccountPtr &account);
+    void prepareConnection(const Tp::AccountPtr &account);
 
 private:
-        Tp::AccountManagerPtr m_AccountManager;
+    Tp::AccountManagerPtr m_AccountManager;
 };
 
 } // namespace RTComLogger

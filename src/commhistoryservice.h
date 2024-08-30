@@ -53,12 +53,6 @@ public Q_SLOTS:
     void setObservedConversations(const QVariantList &conversations);
 
 Q_SIGNALS:
-    void showAuthorizationDialog(const QString& contactId,
-                                 const QString& accountPath,
-                                 const QString& filename,
-                                 const QString& message,
-                                 const QString& transactionId,
-                                 const QString& accountUniqueIdentifier);
     void callHistoryObservedChanged(bool observed);
     void inboxObservedChanged(bool observed, const QString &filterAccount);
     void observedConversationsChanged(const QList<CommHistoryService::Conversation> &conversations);

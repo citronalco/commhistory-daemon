@@ -33,8 +33,8 @@
 
 Q_LOGGING_CATEGORY(lcFsCleanup, "commhistoryd.fscleanup", QtWarningMsg)
 
-FsCleanup::FsCleanup(QObject* aParent) :
-    QObject(aParent)
+FsCleanup::FsCleanup(QObject* aParent)
+    : QObject(aParent)
 {
     CommHistory::UpdatesListener *updatesListener = new CommHistory::UpdatesListener(this);
     connect(updatesListener, &CommHistory::UpdatesListener::eventDeleted,

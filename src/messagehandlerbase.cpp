@@ -36,10 +36,10 @@
 using namespace CommHistory;
 
 MessageHandlerBase::MessageHandlerBase(QObject* parent, QString objectPath,
-    QString serviceName) :
-    QObject(parent),
-    m_isRegistered(false),
-    groupManager(NULL)
+                                       QString serviceName)
+    : QObject(parent)
+    , m_isRegistered(false)
+    , groupManager(NULL)
 {
     QDBusConnection dbus = QDBusConnection::systemBus();
     if (!dbus.isConnected()) {

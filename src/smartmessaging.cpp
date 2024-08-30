@@ -39,9 +39,9 @@ Q_LOGGING_CATEGORY(lcSmartMessaging, "commhistoryd.smartmessaging", QtWarningMsg
 using namespace CommHistory;
 using namespace RTComLogger;
 
-SmartMessaging::SmartMessaging(QObject* parent) :
-    MessageHandlerBase(parent, AGENT_PATH, AGENT_SERVICE),
-    ofonoManager(QOfonoManager::instance())
+SmartMessaging::SmartMessaging(QObject* parent)
+    : MessageHandlerBase(parent, AGENT_PATH, AGENT_SERVICE)
+    , ofonoManager(QOfonoManager::instance())
 {
     QOfonoManager* ofono = ofonoManager.data();
     connect(ofono, SIGNAL(modemAdded(QString)), this, SLOT(onModemAdded(QString)));
