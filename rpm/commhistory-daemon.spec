@@ -12,8 +12,6 @@ BuildRequires:  pkgconfig(Qt5Contacts)
 BuildRequires:  pkgconfig(Qt5Versit)
 BuildRequires:  pkgconfig(Qt5Test)
 BuildRequires:  pkgconfig(commhistory-qt5) >= 1.12.6
-BuildRequires:  pkgconfig(contactcache-qt5)
-BuildRequires:  pkgconfig(qtcontacts-sqlite-qt5-extensions)
 BuildRequires:  pkgconfig(TelepathyQt5) >= 0.9.8
 BuildRequires:  pkgconfig(mlite5)
 BuildRequires:  pkgconfig(mlocale5)
@@ -56,7 +54,6 @@ Daemon for logging communications (IM, SMS and call) in history database.
 %setup -q -n %{name}-%{version}
 
 %build
-unset LD_AS_NEEDED
 %qmake5
 %make_build
 

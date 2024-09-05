@@ -36,7 +36,7 @@ QT -= gui
 
 PKGCONFIG += ngf-qt5 mce nemonotifications-qt5
 PKGCONFIG += TelepathyQt5 commhistory-qt5 mlite5 mlocale5
-PKGCONFIG += qofono-qt5 qofonoext contactcache-qt5 qtcontacts-sqlite-qt5-extensions
+PKGCONFIG += qofono-qt5 qofonoext
 # clock_gettime
 LIBS += -lrt
 
