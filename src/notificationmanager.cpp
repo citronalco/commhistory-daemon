@@ -61,12 +61,12 @@ static const QString voicemailWaitingCategory = "x-nemo.messaging.voicemail-wait
 // constructor
 //
 NotificationManager::NotificationManager(QObject* parent)
-        : QObject(parent)
-        , m_Initialised(false)
-        , m_contactResolver(0)
-        , m_GroupModel(0)
-        , m_ngfClient(0)
-        , m_ngfEvent(0)
+    : QObject(parent)
+    , m_Initialised(false)
+    , m_contactResolver(0)
+    , m_GroupModel(0)
+    , m_ngfClient(0)
+    , m_ngfEvent(0)
 {
 }
 
@@ -77,7 +77,7 @@ NotificationManager::~NotificationManager()
     qDeleteAll(m_unresolvedNotifications);
 }
 
-void NotificationManager::addModem(QString path)
+void NotificationManager::addModem(const QString &path)
 {
     qCDebug(lcCommhistoryd) << "NotificationManager::addModem" << path;
     QOfonoMessageWaiting *mw = new QOfonoMessageWaiting(this);
@@ -127,6 +127,7 @@ void NotificationManager::init()
     connect(ofono, SIGNAL(modemRemoved(QString)), this, SLOT(slotModemRemoved(QString)));
     QStringList modems = ofono->modems();
     qCDebug(lcCommhistoryd) << "Created modem manager";
+
     foreach (QString path, modems) {
         addModem(path);
     }
@@ -332,9 +333,9 @@ void NotificationManager::showNotification(const CommHistory::Event& event,
 
 void NotificationManager::resolveNotification(PersonalNotification *pn)
 {
-    if (pn->remoteUid() == QLatin1String("<hidden>") ||
-        !pn->chatName().isEmpty() ||
-        pn->recipient().isContactResolved()) {
+    if (pn->remoteUid() == QLatin1String("<hidden>")
+            || !pn->chatName().isEmpty()
+            || pn->recipient().isContactResolved()) {
         // Add notification immediately
         addNotification(pn);
     } else {
@@ -417,7 +418,8 @@ static void deleteNotifications(
 static void removeListNotifications(
         QList<PersonalNotification *> *notifications, const QString &accountPath, const QList<int> &removeTypes)
 {
-    auto eraseFrom = std::find_if(notifications->begin(), notifications->end(), [&](PersonalNotification *notification) {
+    auto eraseFrom = std::find_if(notifications->begin(), notifications->end(),
+                                  [&](PersonalNotification *notification) {
         return notification->account() == accountPath && removeTypes.contains(notification->eventType());
     });
 
@@ -436,7 +438,8 @@ void NotificationManager::removeNotifications(const QString &accountPath, const 
 void NotificationManager::removeConversationNotifications(const CommHistory::Recipient &recipient,
                                                           CommHistory::Group::ChatType chatType)
 {
-    auto eraseFrom = std::find_if(m_notifications.begin(), m_notifications.end(), [&](PersonalNotification *notification) {
+    auto eraseFrom = std::find_if(m_notifications.begin(), m_notifications.end(),
+                                  [&](PersonalNotification *notification) {
             return notification->collection() == PersonalNotification::Messaging
                     && notification->chatType() == chatType
                     && (chatType == CommHistory::Group::ChatTypeP2P
@@ -450,7 +453,8 @@ void NotificationManager::removeConversationNotifications(const CommHistory::Rec
 void NotificationManager::slotObservedConversationsChanged(const QList<CommHistoryService::Conversation> &conversations)
 {
     foreach (const CommHistoryService::Conversation &conversation, conversations) {
-        removeConversationNotifications(conversation.first, static_cast<CommHistory::Group::ChatType>(conversation.second));
+        removeConversationNotifications(conversation.first,
+                                        static_cast<CommHistory::Group::ChatType>(conversation.second));
     }
 }
 
@@ -462,7 +466,8 @@ void NotificationManager::slotInboxObservedChanged()
     bool observed = CommHistoryService::instance()->inboxObserved();
     if (observed) {
         QList<int> removeTypes;
-        removeTypes << CommHistory::Event::IMEvent << CommHistory::Event::SMSEvent << CommHistory::Event::MMSEvent << VOICEMAIL_SMS_EVENT_TYPE;
+        removeTypes << CommHistory::Event::IMEvent << CommHistory::Event::SMSEvent
+                    << CommHistory::Event::MMSEvent << VOICEMAIL_SMS_EVENT_TYPE;
 
         if (!isFilteredInbox()) {
             // remove sms, mms and im notifications
@@ -470,7 +475,8 @@ void NotificationManager::slotInboxObservedChanged()
         } else {
             // Filtering is in use, remove only notifications of that account whose threads are visible in inbox:
             QString filteredAccountPath = filteredInboxAccountPath();
-            qCDebug(lcCommhistoryd) << Q_FUNC_INFO << "Removing only notifications belonging to account " << filteredAccountPath;
+            qCDebug(lcCommhistoryd) << Q_FUNC_INFO
+                                    << "Removing only notifications belonging to account " << filteredAccountPath;
             if (!filteredAccountPath.isEmpty())
                 removeNotifications(filteredAccountPath, removeTypes);
         }
@@ -508,7 +514,8 @@ void NotificationManager::removeNotificationTypes(const QList<int> &types)
 {
     qCDebug(lcCommhistoryd) << Q_FUNC_INFO << types;
 
-    auto eraseFrom = std::find_if(m_notifications.begin(), m_notifications.end(), [&](PersonalNotification *notification) {
+    auto eraseFrom = std::find_if(m_notifications.begin(), m_notifications.end(),
+                                  [&](PersonalNotification *notification) {
         return types.contains(notification->eventType());
     });
 
@@ -518,7 +525,8 @@ void NotificationManager::removeNotificationTypes(const QList<int> &types)
 void NotificationManager::addNotification(PersonalNotification *notification)
 {
     if (!m_notifications.contains(notification)) {
-        connect(notification, &PersonalNotification::hasPendingEventsChanged, this, [notification](bool hasEvents) {
+        connect(notification, &PersonalNotification::hasPendingEventsChanged,
+                this, [notification](bool hasEvents) {
             if (hasEvents) {
                 notification->publishNotification();
             }
@@ -608,7 +616,8 @@ QString NotificationManager::notificationText(const CommHistory::Event& event, c
     return text;
 }
 
-static QVariant dbusAction(const QString &name, const QString &displayName, const QString &service, const QString &path, const QString &iface,
+static QVariant dbusAction(const QString &name, const QString &displayName, const QString &service,
+                           const QString &path, const QString &iface,
                            const QString &method, const QVariantList &arguments = QVariantList())
 {
     return Notification::remoteAction(name, displayName, service, path, iface, method, arguments);
@@ -620,7 +629,6 @@ void NotificationManager::setNotificationProperties(Notification *notification, 
 
     switch (pn->collection()) {
         case PersonalNotification::Messaging:
-
             if (pn->eventType() != VOICEMAIL_SMS_EVENT_TYPE && grouped) {
                 // Default action: show the inbox
                 remoteActions.append(dbusAction("default",
@@ -680,7 +688,6 @@ void NotificationManager::setNotificationProperties(Notification *notification, 
             break;
 
         case PersonalNotification::Voice:
-
             // Missed calls.
             // Default action: show Call History
             remoteActions.append(dbusAction("default",
@@ -721,7 +728,6 @@ void NotificationManager::setNotificationProperties(Notification *notification, 
             break;
 
         case PersonalNotification::Voicemail:
-
             // Default action: show voicemail
             remoteActions.append(dbusAction("default",
                                             QString(),
@@ -747,7 +753,8 @@ void NotificationManager::slotContactResolveFinished()
 
     // All events are now resolved
     foreach (PersonalNotification *notification, m_unresolvedNotifications) {
-        qCDebug(lcCommhistoryd) << "Resolved contact for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+        qCDebug(lcCommhistoryd) << "Resolved contact for notification" << notification->account()
+                                << notification->remoteUid() << notification->contactId();
         notification->updateRecipientData();
         addNotification(notification);
     }
@@ -762,7 +769,8 @@ void NotificationManager::slotContactChanged(const RecipientList &recipients)
     // Check all existing notifications and update if necessary
     foreach (PersonalNotification *notification, m_notifications) {
         if (recipients.contains(notification->recipient())) {
-            qCDebug(lcCommhistoryd) << "Contact changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+            qCDebug(lcCommhistoryd) << "Contact changed for notification" << notification->account()
+                                    << notification->remoteUid() << notification->contactId();
             notification->updateRecipientData();
         }
     }
@@ -775,7 +783,8 @@ void NotificationManager::slotContactInfoChanged(const RecipientList &recipients
     // Check all existing notifications and update if necessary
     foreach (PersonalNotification *notification, m_notifications) {
         if (recipients.contains(notification->recipient())) {
-            qCDebug(lcCommhistoryd) << "Contact info changed for notification" << notification->account() << notification->remoteUid() << notification->contactId();
+            qCDebug(lcCommhistoryd) << "Contact info changed for notification" << notification->account()
+                                    << notification->remoteUid() << notification->contactId();
             notification->updateRecipientData();
         }
     }
@@ -933,12 +942,14 @@ void NotificationManager::slotVoicemailWaitingChanged()
             args.append(CALL_HISTORY_PARAMETER);
         }
 
-        voicemailNotification.setRemoteActions(QVariantList() << dbusAction("default", QString(), service, path, iface, method, args)
-                                                              << dbusAction("app", QString(), service, path, iface, method, args));
+        voicemailNotification.setRemoteActions(QVariantList()
+                                               << dbusAction("default", QString(), service, path, iface, method, args)
+                                               << dbusAction("app", QString(), service, path, iface, method, args));
 
         voicemailNotification.setReplacesId(currentId);
         voicemailNotification.publish();
-        qCDebug(lcCommhistoryd) << (currentId ? "Updated" : "Created") << "voicemail waiting notification:" << voicemailNotification.replacesId();
+        qCDebug(lcCommhistoryd) << (currentId ? "Updated" : "Created")
+                                << "voicemail waiting notification:" << voicemailNotification.replacesId();
     }
 }
 

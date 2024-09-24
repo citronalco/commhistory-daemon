@@ -161,7 +161,7 @@ private:
     bool isFilteredInbox();
     QString filteredInboxAccountPath();
     bool updateEditedEvent(const CommHistory::Event &event, const QString &text);
-    void addModem(QString path);
+    void addModem(const QString &path);
 
     QString notificationText(const CommHistory::Event &event, const QString &details);
 

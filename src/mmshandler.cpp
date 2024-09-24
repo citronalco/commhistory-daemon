@@ -678,7 +678,8 @@ int MmsHandler::sendMessage(const QString &imsi, const QStringList &to, const QS
     event.setStatus(Event::SendingStatus);
     event.setIsRead(true);
 
-    event.setRecipients(Recipient(ringAccountPath, CommHistory::normalizePhoneNumber(to[0], false))); // XXX Wrong for group conversations!
+    // XXX Wrong for group conversations!
+    event.setRecipients(Recipient(ringAccountPath, CommHistory::normalizePhoneNumber(to[0], false)));
     event.setToList(normalizeNumberList(to));
     event.setCcList(normalizeNumberList(cc));
     event.setBccList(normalizeNumberList(bcc));

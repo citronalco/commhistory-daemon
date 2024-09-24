@@ -154,7 +154,7 @@ bool PersonalNotification::restore(Notification *n)
 {
     if (m_notification && m_notification != n) {
         delete m_notification;
-        m_notification = 0;
+        m_notification = nullptr;
     }
 
     // Support old style binary data, but use base64 normally
@@ -226,7 +226,8 @@ void PersonalNotification::publishNotification()
 
     setHasPendingEvents(false);
 
-    qCDebug(lcCommhistoryd) << m_notification->replacesId() << m_notification->category() << m_notification->summary() << m_notification->body();
+    qCDebug(lcCommhistoryd) << m_notification->replacesId() << m_notification->category()
+                            << m_notification->summary() << m_notification->body();
 }
 
 void PersonalNotification::removeNotification()
