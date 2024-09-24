@@ -755,7 +755,6 @@ void NotificationManager::slotContactResolveFinished()
     foreach (PersonalNotification *notification, m_unresolvedNotifications) {
         qCDebug(lcCommhistoryd) << "Resolved contact for notification" << notification->account()
                                 << notification->remoteUid() << notification->contactId();
-        notification->updateRecipientData();
         addNotification(notification);
     }
 

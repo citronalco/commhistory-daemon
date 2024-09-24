@@ -171,6 +171,8 @@ bool PersonalNotification::restore(Notification *n)
     if (stream.status())
         return false;
 
+    // we don't want pending changes from above deserialization of an existing notification
+    setHasPendingEvents(false);
     m_notification = n;
     m_recipient = Recipient(account(), remoteUid());
     connect(m_notification, SIGNAL(closed(uint)), SLOT(onClosed(uint)));
