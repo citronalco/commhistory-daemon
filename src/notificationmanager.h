@@ -89,6 +89,11 @@ public:
     void removeNotificationTypes(const QList<int> &types);
 
     /*!
+     * \brief removes notification by event token
+     */
+    void removeNotificationToken(const QString &token);
+
+    /*!
      * \brief return group model with all conversations
      * \returns group model pointer
      */
@@ -115,6 +120,8 @@ public Q_SLOTS:
      * \param accountPath Notifications of this account are to be removed.
      */
     void removeNotifications(const QString &accountPath, const QList<int> &removeTypes = QList<int>());
+    void removeConversationNotifications(const CommHistory::Recipient &recipient,
+                                         CommHistory::Group::ChatType chatType=CommHistory::Group::ChatType::ChatTypeP2P);
 
 private Q_SLOTS:
     /*!
@@ -147,9 +154,6 @@ private:
 
     void resolveNotification(PersonalNotification *notification);
     void addNotification(PersonalNotification *notification);
-
-    void removeConversationNotifications(const CommHistory::Recipient &recipient,
-                                         CommHistory::Group::ChatType chatType);
 
     void syncNotifications();
     int pendingEventCount();
