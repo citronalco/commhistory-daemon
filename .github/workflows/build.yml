@@ -6,10 +6,10 @@ on:
       - '*'
   pull_request:
     branches:
-    
+
       - master
 env:
-  RELEASE: 4.6.0.13
+  RELEASE: 5.0.0.55
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
 
     - name: Prepare
       run: mkdir output
-      
+  
     - name: Build armv7hl
       id: build_armv7hl
       uses: coderus/github-sfos-build@master
@@ -41,7 +41,7 @@ jobs:
       with:
         release: ${{ env.RELEASE }}
         arch: i486
-      
+  
     - name: Upload build result
       uses: actions/upload-artifact@v4
       with:
@@ -60,4 +60,3 @@ jobs:
         gh release create "$tag_name" "${assets[@]}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
