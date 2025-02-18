@@ -28,9 +28,6 @@ public:
                           CommHistory::Group::ChatType chatType = CommHistory::Group::ChatTypeP2P,
                           const QString &details = QString());
 
-    void removeNotificationToken(const QString &token);
-    void removeConversationNotifications(const CommHistory::Recipient &recipient,
-                                         CommHistory::Group::ChatType chatType=CommHistory::Group::ChatType::ChatTypeP2P);
     CommHistory::GroupModel* groupModel();
     void showVoicemailNotification(int count);
     void playClass0SMSAlert();
