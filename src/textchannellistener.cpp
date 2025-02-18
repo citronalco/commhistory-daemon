@@ -1044,6 +1044,13 @@ TextChannelListener::DeliveryHandlingStatus TextChannelListener::handleDeliveryR
     int deliveryStatus = status.value<int>();
     qCDebug(lcCommhistoryd) << "[DELIVERY] Message delivery status: " << deliveryStatus;
 
+    if ((deliveryStatus == Tp::DeliveryStatusRead)
+        && (event.direction() == CommHistory::Event::Inbound)) {
+
+        NotificationManager::instance()->removeConversationNotifications(event.recipients().value(0));
+        return DeliveryHandlingResolved;
+    }
+
     switch (deliveryStatus) {
     case Tp::DeliveryStatusDelivered: {
         event.setStatus(CommHistory::Event::DeliveredStatus);
