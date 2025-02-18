@@ -147,9 +147,8 @@ private:
 
     void resolveNotification(PersonalNotification *notification);
     void addNotification(PersonalNotification *notification);
-
     void removeConversationNotifications(const CommHistory::Recipient &recipient,
-                                         CommHistory::Group::ChatType chatType);
+                                         CommHistory::Group::ChatType chatType=CommHistory::Group::ChatType::ChatTypeP2P);
 
     void syncNotifications();
     int pendingEventCount();

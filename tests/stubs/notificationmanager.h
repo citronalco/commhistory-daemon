@@ -45,6 +45,8 @@ public:
 
     static NotificationManager* m_pInstance;
     QContactManager *m_pContactManager;
+    void removeConversationNotifications(const CommHistory::Recipient &recipient,
+                                         CommHistory::Group::ChatType chatType=CommHistory::Group::ChatType::ChatTypeP2P);
     CommHistory::GroupModel *m_GroupModel;
 };
 
